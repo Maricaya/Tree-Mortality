@@ -1,0 +1,5 @@
+*.pyc
+*.DS_Store
+*.nc
+*.nc4
+*.sw*

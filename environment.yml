@@ -1,0 +1,15 @@
+# conda env create -f environment.yml
+name: ecopro
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.6
+  - xarray
+  - matplotlib
+  - cartopy
+  - numpy
+  - requests
+  - pandas
+  - netcdf4
+  - rioxarray
+  - rasterio
