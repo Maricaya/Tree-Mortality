@@ -5,9 +5,9 @@ import json
 import click
 import pyproj
 import numpy as np
-import rioxarray as rxr
-import rasterio as rio
 import xarray as xr
+import rasterio as rio
+import rioxarray as rxr
 from glob import glob
 from tqdm import tqdm
 from pathlib import Path
@@ -58,7 +58,7 @@ def read_archive(vinfo, zipfile):
 
     zfb = os.path.splitext(os.path.basename(zipfile))[0]
     with ZipFile(zipfile) as zf:
-        names = sorted(zf.namelist())[:2]
+        names = sorted(zf.namelist())
         for name in tqdm(names, f'Extracting {zfb}'):
             with zf.open(name) as ah, rio.MemoryFile(ah) as af:
                 vname, date, ds = read_file(vinfo, name, af)
@@ -94,15 +94,15 @@ def read_file(vinfo, ascfilename, ascmemfile):
     dataset = xr.Dataset(
         data_vars={
             vname: (
-                ['northing', 'easting', 'time'],
-                data[..., np.newaxis],
+                ['time', 'northing', 'easting'],
+                data[np.newaxis, ...],
                 info
             )
         },
         coords={
+            'time': xr.Variable('time', [date]),
             'northing': xr.Variable('northing', northing, xy_units),
             'easting': xr.Variable('easting', easting, xy_units),
-            'time': xr.Variable('time', [date]),
         }
     )
 
@@ -156,7 +156,13 @@ def main(datadir, configfile, outputfile):
 
     dataset.rio.write_crs(pstr, inplace=True)
 
-    dataset.to_netcdf(outputfile, engine='netcdf4')
+    dataset.to_netcdf(
+        outputfile, engine='h5netcdf',
+        encoding={
+            v: {"compression": "gzip", "compression_opts": 9}
+            for v in dataset.data_vars
+        },
+    )
 
 
 if __name__ == '__main__':
