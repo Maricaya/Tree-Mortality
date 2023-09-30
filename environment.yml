@@ -13,3 +13,6 @@ dependencies:
   - netcdf4
   - rioxarray
   - rasterio
+  - dask
+  - zarr
+  - h5netcdf
