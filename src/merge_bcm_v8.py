@@ -14,7 +14,11 @@ from dask.diagnostics import ProgressBar
 ))
 def main(netcdffiles, zarrfile):
 
-    chunks = { 'time': 5 }
+    chunks = {
+        'time': 12,
+        'easting': 100,
+        'northing': 100,
+    }
 
     ds = xr.open_mfdataset(netcdffiles, parallel=True, join='override').chunk(chunks)
     write_job = ds.to_zarr(zarrfile, mode='w', compute=False, consolidated=True)
