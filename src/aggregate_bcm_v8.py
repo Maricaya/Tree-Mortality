@@ -31,6 +31,7 @@ def main(inputfile, configfile, outputfile):
         config = json.load(f)
 
     chunks = config['chunks']
+    out_chunks = config['output_chunks']
     aggregation_funcs = config['aggregation']
 
     with xr.open_zarr(inputfile) as ds:
@@ -38,9 +39,12 @@ def main(inputfile, configfile, outputfile):
         ds = ds.reindex(time=to_water_year(ds.time.values))
 
         aggregated = xr.merge([
-            getattr(ds[var].groupby('time.year'), afunc)(dim='time')
+            getattr(ds[var].groupby('time.year'), afunc)(dim='time', skipna=False)
             for var, afunc in tqdm(sorted(aggregation_funcs.items()), 'Grouping')
         ], combine_attrs='drop_conflicts')
+
+        out_chunks['year'] = len(aggregated.year)
+        aggregated = aggregated.chunk(out_chunks)
 
         write_job = aggregated.to_zarr(outputfile, mode='w', compute=False, consolidated=True)
         with ProgressBar():

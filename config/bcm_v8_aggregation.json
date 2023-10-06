@@ -4,6 +4,10 @@
     "easting": 1000,
     "northing": 1000
   },
+  "output_chunks": {
+    "easting": 64,
+    "northing": 64
+  },
   "aggregation": {
     "aet": "sum",
     "cwd": "sum",
