@@ -27,17 +27,11 @@ def to_water_year(dt):
 ))
 def main(inputfile, configfile, outputfile):
 
-
-    chunks = {
-        'time': 12,
-        'easting': 1000,
-        'northing': 1000,
-    }
-
-
     with open(configfile, 'r') as f:
-        aggregation_funcs = json.load(f)
+        config = json.load(f)
 
+    chunks = config['chunks']
+    aggregation_funcs = config['aggregation']
 
     with xr.open_zarr(inputfile) as ds:
         ds = ds.chunk(chunks)

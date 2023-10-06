@@ -1,12 +1,19 @@
 {
-  "aet": "sum",
-  "cwd": "sum",
-  "pck": "sum",
-  "pet": "sum",
-  "ppt": "sum",
-  "rch": "sum",
-  "run": "sum",
-  "str": "sum",
-  "tmn": "min",
-  "tmx": "max"
+  "chunks": {
+    "time": 12,
+    "easting": 1000,
+    "northing": 1000
+  },
+  "aggregation": {
+    "aet": "sum",
+    "cwd": "sum",
+    "pck": "sum",
+    "pet": "sum",
+    "ppt": "sum",
+    "rch": "sum",
+    "run": "sum",
+    "str": "sum",
+    "tmn": "min",
+    "tmx": "max"
+  }
 }
