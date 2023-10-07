@@ -1,0 +1,44 @@
+{
+  "chunks": {
+    "easting": 512,
+    "northing": 512
+  },
+  "output_chunks": {
+    "easting": 512,
+    "northing": 512
+  },
+  "n_workers": 4,
+  "focal_period": [2006, 2021],
+  "reference_period": [1980, 2005],
+  "spans": [1, 2, 3, 4, 5, 6],
+  "time_dim": "year",
+  "indices": [
+    {
+      "name": "PR",
+      "name_format": "PR{span}",
+      "long_name_format": "{span}-Year Cumulative Precipitation",
+      "params": {
+        "precip": "ppt"
+      }
+    },
+    {
+      "name": "PRET",
+      "name_format": "PRET{span}",
+      "long_name_format": "{span}-Year Cumulative Water Balance",
+      "params": {
+        "precip": "ppt",
+        "et": "pet"
+      }
+    },
+    {
+      "name": "SPI",
+      "name_format": "SPI{span}",
+      "long_name_format": "{span}-Year Standard Precipitation Index"
+    },
+    {
+      "name": "SPEI",
+      "name_format": "SPEI{span}",
+      "long_name_format": "{span}-Year Standardized Water Balance Index"
+    }
+  ]
+}
