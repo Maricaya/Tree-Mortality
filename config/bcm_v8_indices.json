@@ -1,4 +1,8 @@
 {
+  "dask_client": {
+    "n_workers": 7,
+    "memory_limit": "16GB"
+  },
   "chunks": {
     "easting": 512,
     "northing": 512
@@ -7,7 +11,6 @@
     "easting": 512,
     "northing": 512
   },
-  "n_workers": 4,
   "focal_period": [2006, 2021],
   "reference_period": [1980, 2005],
   "spans": [1, 2, 3, 4, 5, 6],
@@ -33,12 +36,24 @@
     {
       "name": "SPI",
       "name_format": "SPI{span}",
-      "long_name_format": "{span}-Year Standard Precipitation Index"
+      "long_name_format": "{span}-Year Standard Precipitation Index",
+      "params": {
+        "chunk": {
+          "northing": 256,
+          "easting": 128
+        }
+      }
     },
     {
       "name": "SPEI",
       "name_format": "SPEI{span}",
-      "long_name_format": "{span}-Year Standardized Water Balance Index"
+      "long_name_format": "{span}-Year Standardized Water Balance Index",
+      "params": {
+        "chunk": {
+          "northing": 256,
+          "easting": 128
+        }
+      }
     }
   ]
 }

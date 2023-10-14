@@ -37,12 +37,16 @@ def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
 
 def compute_si_ppf(focal_period, reference_period=None,
         reference_dist=gamma, prob_zero: bool = False, fit_kwargs: dict = None,
-        time_dim: str = 'year'):
+        time_dim: str = 'year', chunk: dict = None):
 
     if reference_period is None:
         reference_period = focal_period
 
     new_time_dim = f'_new_{time_dim}'
+
+    if chunk is not None:
+        focal_period = focal_period.chunk(chunk)
+        reference_period = reference_period.chunk(chunk)
 
     return xr.apply_ufunc(
         _compute_si,
@@ -64,22 +68,24 @@ def compute_si_ppf(focal_period, reference_period=None,
     )
 
 
-def spi(focal_period, reference_period=None, time_dim='year'):
+def spi(focal_period, reference_period=None, time_dim='year', chunk=None):
     return compute_si_ppf(
         focal_period, reference_period,
         reference_dist=gamma,
         prob_zero=True,
         fit_kwargs={ 'floc': 0 },
-        time_dim=time_dim
+        time_dim=time_dim,
+        chunk=chunk
     ).transpose(*focal_period.dims)
 
 
-def spei(focal_period, reference_period=None, time_dim='year'):
+def spei(focal_period, reference_period=None, time_dim='year', chunk=None):
     return compute_si_ppf(
         focal_period, reference_period,
-        reference_dist=fisk,
+        reference_dist=gamma,
         prob_zero=False,
-        time_dim=time_dim
+        time_dim=time_dim,
+        chunk=chunk
     ).transpose(*focal_period.dims)
 
 
@@ -89,7 +95,7 @@ def pr(ds, window, precip='ppt'):
     )
 
 
-def pret(ds, window, precip='ppt', et='aet'):
+def pret(ds, window, precip='ppt', et='pet'):
     wb = ds[precip] - ds[et]
     return wb.rolling(window).sum().assign_attrs(
         {'units': ds[precip].units}
@@ -115,13 +121,13 @@ def make_indices(ds, span, focal_period, reference_period, indices, time_dim='ye
                 pr_in = inputs['PR']
                 foc = pr_in.sel({ time_dim: slice(*focal_period) })
                 ref = pr_in.sel({ time_dim: slice(*reference_period) })
-                da = spi(foc, ref, time_dim=time_dim)
+                da = spi(foc, ref, time_dim=time_dim, **params)
 
             case "SPEI":
                 wb_in = inputs['PRET']
                 foc = wb_in.sel({ time_dim: slice(*focal_period) })
                 ref = wb_in.sel({ time_dim: slice(*reference_period) })
-                da = spei(foc, ref, time_dim=time_dim)
+                da = spei(foc, ref, time_dim=time_dim, **params)
 
             case _:
                 raise ValueError(f'Unknown index "{name}"')
@@ -159,10 +165,10 @@ def main(inputfile, configfile, outputfile):
     indices = config['indices']
     chunks = config['chunks']
     out_chunks = config['output_chunks']
-    n_workers = config['n_workers']
+    dask_client = config.get('dask_client', {})
 
     # Start Dask client for monitoring
-    client = Client(n_workers=n_workers)
+    client = Client(**dask_client)
 
     with xr.open_zarr(inputfile) as ds:
 
