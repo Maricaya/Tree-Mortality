@@ -1,12 +1,12 @@
 {
   "chunks": {
     "time": 12,
-    "easting": 1000,
-    "northing": 1000
+    "easting": 512,
+    "northing": 512
   },
   "output_chunks": {
-    "easting": 64,
-    "northing": 64
+    "easting": 512,
+    "northing": 512
   },
   "aggregation": {
     "aet": "sum",

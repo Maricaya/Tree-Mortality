@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import click
 from pathlib import Path
+import json
 import xarray as xr
 from dask.diagnostics import ProgressBar
 
@@ -12,16 +13,29 @@ from dask.diagnostics import ProgressBar
 @click.argument('zarrfile', type=click.Path(
     path_type=Path, exists=False
 ))
-def main(netcdffiles, zarrfile):
+@click.option('-c', '--configfile', default=None,
+    type=click.Path(path_type=Path, exists=True)
+)
+def main(netcdffiles, zarrfile, configfile):
 
-    chunks = {
-        'time': 12,
-        'easting': 100,
-        'northing': 100,
-    }
+    if configfile is not None:
+        with open(configfile, 'r') as f:
+            config = json.load(f)
+    else:
+        config = {}
 
-    ds = xr.open_mfdataset(netcdffiles, parallel=True, join='override').chunk(chunks)
-    write_job = ds.to_zarr(zarrfile, mode='w', compute=False, consolidated=True)
+    chunks = config.get('chunks', None)
+
+    ds = xr.open_mfdataset(
+        netcdffiles, engine='h5netcdf', parallel=True, join='override'
+    )
+
+    if chunks is not None:
+        ds = ds.chunk(chunks)
+
+    write_job = ds.to_zarr(
+        zarrfile, mode='w', compute=False, consolidated=True
+    )
 
     with ProgressBar():
         write_job.persist()
