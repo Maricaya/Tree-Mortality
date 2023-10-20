@@ -3,7 +3,7 @@ import click
 import json
 from pathlib import Path
 import xarray as xr
-from dask.distributed import Client
+from dask.diagnostics import ProgressBar
 
 
 @click.command()
@@ -26,25 +26,23 @@ def main(zarrfile, nc4file, configfile):
 
     chunk_config = config.get('chunks', None)
 
-    client = Client()
-
     ds = xr.open_zarr(zarrfile)
 
     if chunk_config is not None:
         ds = ds.chunk(chunk_config)
 
+    # Add compression to encoding
+    comp = dict(zlib=True, complevel=9)
+    for v in ds.data_vars:
+        ds[v].encoding.update(comp)
+
     write_job = ds.to_netcdf(
         nc4file, engine='h5netcdf',
-        encoding={
-            v: {"compression": "gzip", "compression_opts": 9}
-            for v in ds.data_vars
-        },
         compute=False
     )
 
-    print(f'Writing data, view progress: {client.dashboard_link}')
-    write_job.compute()
-    print('Done')
+    with ProgressBar():
+        write_job.persist()
 
 
 if __name__ == '__main__':
