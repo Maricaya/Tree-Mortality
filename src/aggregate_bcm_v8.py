@@ -15,6 +15,13 @@ def to_water_year(dt):
     return (dt.astype('datetime64[M]') + WY_DETLA).astype('datetime64[ns]')
 
 
+def aggregate(ds, **kwargs):
+    return xr.merge([
+        getattr(ds[var], afunc)(dim='time', skipna=False)
+        for var, afunc in kwargs.items()
+    ], combine_attrs='drop_conflicts')
+
+
 @click.command()
 @click.argument('inputfile', type=click.Path(
     path_type=Path, exists=True
@@ -40,15 +47,16 @@ def main(inputfile, configfile, outputfile):
         ds = ds.chunk(chunks)
         ds = ds.reindex(time=to_water_year(ds.time.values))
 
-        aggregated = xr.merge([
-            getattr(ds[var].groupby('time.year'), afunc)(dim='time', skipna=False)
-            for var, afunc in tqdm(sorted(aggregation_funcs.items()), 'Grouping')
-        ], combine_attrs='drop_conflicts')
+        grouped = ds.groupby('time.year')
+
+        aggregated = grouped.map(aggregate, **aggregation_funcs)
 
         out_chunks['year'] = len(aggregated.year)
         aggregated = aggregated.chunk(out_chunks)
 
-        write_job = aggregated.to_zarr(outputfile, mode='w', compute=False, consolidated=True)
+        write_job = aggregated.to_zarr(
+            outputfile, mode='w', compute=False, consolidated=True
+        )
 
         print(f'Writing data, view progress: {client.dashboard_link}')
         write_job.compute()
