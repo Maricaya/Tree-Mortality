@@ -14,6 +14,7 @@ from pathlib import Path
 from zipfile import ZipFile
 from datetime import datetime
 from collections import defaultdict
+from dask.diagnostics import ProgressBar
 
 
 FILE_RE = '([a-z]{3})([0-9]{4}[a-z]{3})'
@@ -51,7 +52,7 @@ def time_concat(datasets):
     )
 
 
-def read_archive(vinfo, zipfile):
+def read_archive(vinfo, zipfile, chunks):
     last_vname = None
 
     months = {}
@@ -70,7 +71,7 @@ def read_archive(vinfo, zipfile):
 
     combined = time_concat(
         [ds for _, ds in sorted(months.items())]
-    )
+    ).chunk(chunks)
 
     return vname, min(months.keys()), combined
 
@@ -123,14 +124,15 @@ def main(datadir, configfile, outputfile):
 
     config = load_config(configfile)
     vinfo = config['variables']
+    chunks = config['chunks']
     pstr = config['projection']
 
-    zip_files = sorted(glob(os.path.join(datadir, '*.zip')))
+    zip_files = sorted(glob(os.path.join(datadir, '*', '*.zip')))
 
     datasets = defaultdict(dict)
 
     for zf in zip_files:
-        vname, start, dataset = read_archive(vinfo, zf)
+        vname, start, dataset = read_archive(vinfo, zf, chunks)
         datasets[vname][start] = dataset
 
     all_dates = set([])
@@ -152,17 +154,16 @@ def main(datadir, configfile, outputfile):
     dataset = xr.merge([
         time_concat([d for _, d in sorted(dd.items())])
         for vname, dd in sorted(datasets.items())
-    ])
+    ], join='override')
 
     dataset.rio.write_crs(pstr, inplace=True)
 
-    dataset.to_netcdf(
-        outputfile, engine='h5netcdf',
-        encoding={
-            v: {"compression": "gzip", "compression_opts": 9}
-            for v in dataset.data_vars
-        },
+    write_job = dataset.to_zarr(
+        outputfile, mode='w', compute=False, consolidated=True
     )
+
+    with ProgressBar():
+        write_job.persist()
 
 
 if __name__ == '__main__':

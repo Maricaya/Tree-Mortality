@@ -41,5 +41,10 @@
       "long_name": "Maximum Temperature",
       "units": "C"
     }
+  },
+  "chunks": {
+    "time": 12,
+    "northing": 512,
+    "easting": 512
   }
 }
