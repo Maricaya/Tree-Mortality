@@ -7,6 +7,7 @@ import xarray as xr
 from tqdm import tqdm
 from scipy.stats import norm, gamma, fisk
 from dask.distributed import Client
+from dask_jobqueue import SLURMCluster
 
 
 def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
@@ -165,10 +166,15 @@ def main(inputfile, configfile, outputfile):
     indices = config['indices']
     chunks = config['chunks']
     out_chunks = config['output_chunks']
-    dask_client = config.get('dask_client', {})
 
-    # Start Dask client for monitoring
-    client = Client(**dask_client)
+    if 'dask_slurm' in config:
+        cluster = SLURMCluster(**config['dask_slurm'])
+        client = Client(cluster)
+
+    else:
+        dask_client = config.get('dask_client', {})
+        # Start Dask client for monitoring
+        client = Client(**dask_client)
 
     with xr.open_zarr(inputfile) as ds:
 

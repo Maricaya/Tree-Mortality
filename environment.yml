@@ -15,4 +15,6 @@ dependencies:
   - rasterio
   - dask
   - zarr
+  - tqdm
   - h5netcdf
+  - dask-jobqueue
