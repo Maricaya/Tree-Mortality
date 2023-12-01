@@ -26,7 +26,7 @@ def main(zarrfile, outputdir, configfile):
     else:
         config = {}
 
-    file_fmt = config.get('filename_format', '{variable}_{year}.tiff')
+    file_fmt = config.get('filename_format', '{variable}_{year}.tif')
 
     ds = xr.open_zarr(zarrfile)
 
