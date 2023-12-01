@@ -1,0 +1,29 @@
+{
+  "projection": "EPSG:3310",
+  "start_year": 2012,
+  "variables": {
+    "gridRef_treeMortalitySN_Abies_ACRE_byYear.nc": {
+      "input": "var_1",
+      "name": "area",
+      "long_name": "Survey Area",
+      "units": "acres"
+    },
+    "gridRef_treeMortalitySN_Abies_MORT_byYear.nc": {
+      "input": "var_1",
+      "name": "mortality",
+      "long_name": "Tree Mortality Count",
+      "units": "trees"
+    },
+    "gridRef_treeMortalitySN_Abies_MORT_TPA_byYear.nc": {
+      "input": "var_1",
+      "name": "tpa",
+      "long_name": "Tree Mortality Per Acre",
+      "units": "trees / acre"
+    }
+  },
+  "chunks": {
+    "year": -1,
+    "northing": 512,
+    "easting": 512
+  }
+}
