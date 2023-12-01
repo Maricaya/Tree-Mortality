@@ -18,3 +18,4 @@ dependencies:
   - tqdm
   - h5netcdf
   - dask-jobqueue
+  - fiona
