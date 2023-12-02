@@ -1,22 +1,38 @@
 #!/usr/bin/env python
-import os
 import json
 import click
 import numpy as np
 import xarray as xr
 import rioxarray
 from pathlib import Path
-from tqdm import tqdm
 from dask.diagnostics import ProgressBar
 
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 
+def make_folds(ds, grid_size):
+    cols = len(ds.easting.values)
+    rows = len(ds.northing.values)
+    cc = np.arange(cols) // grid_size
+    rr = (cc.max() + 1) * (np.arange(rows) // grid_size)
 
-def load_config(configfile):
-    with open(configfile, 'r') as f:
-        return json.load(f)
+    folds = np.zeros((cols, rows), dtype=int) + cc[..., np.newaxis] + rr
+
+    dataset = xr.Dataset(
+        data_vars={
+            'fold': (
+                ['easting', 'northing'],
+                folds,
+                {
+                    'long_name': 'fold',
+                }
+            )
+        },
+        coords={
+            'easting': ds.easting,
+            'northing': ds.northing,
+        }
+    )
+
+    return dataset
 
 
 @click.command()
@@ -31,30 +47,26 @@ def load_config(configfile):
 ))
 def main(inputfile, configfile, outputfile):
 
+    # Load config
     with open(configfile, 'r') as f:
         config = json.load(f)
-
     grid_size = config['grid_size']
+    chunks = config['chunks']
 
-    ds = xr.open_zarr(inputfile).sel(year=2019)
-    tpa = ds['tpa']
+    ds = xr.open_zarr(inputfile)
 
-    fig, ax = plt.subplots(1, 1, subplot_kw=dict(projection=ccrs.Mercator()))
+    folds = make_folds(ds, grid_size)
 
-    ds_crs = ccrs.Projection(ds.rio.crs)
-    tpa.plot.pcolormesh(x='easting', y='northing', transform=ds_crs, ax=ax)
-    ax.add_feature(cfeature.STATES.with_scale('50m'))
+    new_dataset = xr.merge([ds, folds], join='exact')
 
-    xs = np.array(tpa.easting.values)
-    ys = np.array(tpa.northing.values)
+    new_dataset = new_dataset.chunk(chunks)
 
-    for x in xs[::grid_size]:
-        ax.plot([x, x], [ys.min(), ys.max()], 'k-', transform=ds_crs, alpha=0.2)
+    write_job = new_dataset.to_zarr(
+        outputfile, mode='w', compute=False, consolidated=True
+    )
 
-    for y in ys[::grid_size]:
-        ax.plot([xs.min(), xs.max()], [y, y], 'k-', transform=ds_crs, alpha=0.2)
-
-    plt.show()
+    with ProgressBar():
+        write_job.persist()
 
 
 if __name__ == '__main__':
