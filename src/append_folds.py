@@ -15,6 +15,7 @@ def make_folds(ds, grid_size):
     rr = (cc.max() + 1) * (np.arange(rows) // grid_size)
 
     folds = np.zeros((cols, rows), dtype=int) + cc[..., np.newaxis] + rr
+    idx = np.arange(cols * rows, dtype=int).reshape((rows, cols)).T
 
     dataset = xr.Dataset(
         data_vars={
@@ -23,6 +24,13 @@ def make_folds(ds, grid_size):
                 folds,
                 {
                     'long_name': 'fold',
+                }
+            ),
+            'id': (
+                ['easting', 'northing'],
+                idx,
+                {
+                    'long_name': 'cell identifier',
                 }
             )
         },
