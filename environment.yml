@@ -19,3 +19,4 @@ dependencies:
   - h5netcdf
   - dask-jobqueue
   - fiona
+  - scikit-learn
