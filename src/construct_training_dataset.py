@@ -12,7 +12,7 @@ from dask.distributed import Client
 def get_features(clim, year, feature_info):
     features = []
 
-    for fbase, finfo in tqdm(list(feature_info.items()), 'Extracting features'):
+    for fbase, finfo in feature_info.items():
         for b in range(finfo['back']):
             cyear = clim.sel(year=(year - b)).assign_coords(year=[year])
             for l in range(1, finfo['lags'] + 1):
@@ -64,9 +64,6 @@ def to_samples(mort, clim, year, feature_info):
 ))
 def main(mortalityfile, climatefile, configfile, outputfile):
 
-    client = Client()
-    print(f'View progress: {client.dashboard_link}')
-
     # Load config
     with open(configfile, 'r') as f:
         config = json.load(f)
@@ -95,6 +92,9 @@ def main(mortalityfile, climatefile, configfile, outputfile):
         ],
         dim='sample', coords='all', compat='identical'
     )
+
+    client = Client()
+    print(f'View progress: {client.dashboard_link}')
 
     print(f'Selecting data...')
     good = combined['tpa'].notnull().compute()
