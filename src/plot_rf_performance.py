@@ -9,14 +9,33 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-LABELS = {
+XLABELS = {
     'r2': 'R$^2$',
     'rmse': 'RMSE (trees / acre)',
+}
+
+YLABELS = {
+    'r2': 'Cumulative Density',
+    'rmse': 'Count',
 }
 
 XLIM = {
     'r2': (-1, 1),
     'rmse': (0, None),
+}
+
+PLOTARGS = {
+    'rmse': {
+        'facecolor': 'k',
+        'edgecolor': 'none',
+    },
+    'r2': {
+        'edgecolor': 'k',
+        'histtype': 'step',
+        'cumulative': True,
+        'density': True,
+        'bins': np.linspace(-1, 1, 21),
+    }
 }
 
 
@@ -52,19 +71,21 @@ def main(resultfiles, outputfile):
         figs.append(fig)
         for s, sname in enumerate(stats):
             ax = fig.add_subplot(1, len(stats), s + 1)
-            ax.hist(stats[sname], facecolor='k', edgecolor='none')
+            ax.hist(stats[sname], **PLOTARGS[sname])
             if sname == 'r2':
                 ymin, ymax = ax.get_ylim()
+                ymin, ymax = 0, 1
                 ax.fill_between(
                     [-1, 0], [ymin, ymin], [ymax, ymax],
                     edgecolor='none', facecolor='red', alpha=0.3
                 )
                 ax.set_ylim(ymin, ymax)
+            else:
+                ax.set_yticks([])
 
-            ax.set_xlabel(LABELS[sname], fontsize=16)
+            ax.set_xlabel(XLABELS[sname], fontsize=16)
+            ax.set_ylabel(YLABELS[sname], fontsize=16)
             ax.set_xlim(*get_xlim(sname, ax.get_xlim()))
-            ax.set_yticks([])
-            ax.set_ylabel('Count', fontsize=16)
 
     with PdfPages(outputfile) as pdf:
         for fig in figs:
