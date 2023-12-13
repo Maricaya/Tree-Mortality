@@ -5,6 +5,7 @@ import click
 import numpy as np
 import xarray as xr
 import rasterio as rio
+import geopandas as gpd
 import rioxarray as rxr
 from pathlib import Path
 from tqdm import tqdm
@@ -23,7 +24,7 @@ def load_variable(fname, vinfo, start_year):
     ds = xr.open_dataset(fname, engine='netcdf4')
 
     # Select/rename variable and add attributes
-    var = ds[invar].transpose('easting', 'northing', 'time')
+    var = ds[invar].transpose('northing', 'easting', 'time')
     var = var.rename(name).assign_attrs(**vinfo)
     del var.attrs['grid_mapping']
 
@@ -51,6 +52,10 @@ def main(datadir, configfile, outputfile):
     vinfo = config['variables']
     chunks = config['chunks']
     pstr = config['projection']
+    region_shapefile = config['region_shapefile']
+
+    region_df = gpd.read_file(os.path.join(datadir, region_shapefile))
+    region = region_df.geometry.values
 
     variables = []
     for fname, vi in tqdm(list(vinfo.items()), 'Loading Variables'):
@@ -60,6 +65,11 @@ def main(datadir, configfile, outputfile):
     dataset = xr.merge(variables, join='exact', combine_attrs='drop')
 
     dataset.rio.write_crs(pstr, inplace=True)
+
+    dataset = dataset.fillna(0.0)
+    dataset = dataset.rename({ 'easting': 'x', 'northing': 'y' })
+    dataset = dataset.rio.clip(region, region_df.crs)
+    dataset = dataset.rename({ 'x': 'easting', 'y': 'northing' })
 
     dataset = dataset.chunk(chunks)
 

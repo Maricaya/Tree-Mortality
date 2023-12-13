@@ -21,6 +21,7 @@
       "units": "trees / acre"
     }
   },
+  "region_shapefile": "Sierra_Nevada_Conservancy_Boundary/Sierra_Nevada_Conservancy_Boundary_buffer.shp",
   "chunks": {
     "year": -1,
     "northing": 512,
