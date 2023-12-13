@@ -6,7 +6,7 @@ import xarray as xr
 import rioxarray
 from pathlib import Path
 from tqdm import tqdm
-from dask.distributed import Client
+from dask.diagnostics import ProgressBar
 
 
 def get_features(clim, year, feature_info):
@@ -93,9 +93,6 @@ def main(mortalityfile, climatefile, configfile, outputfile):
         dim='sample', coords='all', compat='identical'
     )
 
-    client = Client()
-    print(f'View progress: {client.dashboard_link}')
-
     print(f'Selecting data...')
     good = combined['tpa'].notnull().compute()
     combined = combined.where(good, drop=True)
@@ -105,7 +102,8 @@ def main(mortalityfile, climatefile, configfile, outputfile):
     )
 
     print(f'Writing data...')
-    write_job.compute()
+    with ProgressBar():
+        write_job.persist()
     print('Done')
 
 
