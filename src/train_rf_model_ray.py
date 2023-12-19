@@ -31,7 +31,7 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     Xtrn, ytrn = filter_inf(Xtrn, ytrn)
 
     rf = RandomForestRegressor(max_depth=5)
-    rf.fit(Xtrn[::1000], ytrn[::1000])
+    rf.fit(Xtrn, ytrn)
 
     idx = (ds['fold'] == held_out_fold).compute()
     ds_tst = ds.where(idx, drop=True).compute()
@@ -84,7 +84,7 @@ def main(trainingfile, resultfile):
     ids = np.unique(ds['id']).astype(int)
 
     tasks = []
-    for year, fold in product(years[:2], folds[:2]):
+    for year, fold in product(years, folds):
         task = eval_fold.remote(trainingfile, fold, year)
         tasks.append(task)
 
