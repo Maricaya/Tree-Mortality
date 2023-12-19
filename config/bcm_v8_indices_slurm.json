@@ -1,8 +1,8 @@
 {
   "dask_slurm": {
     "queue": "defq",
-    "account": "air-land",
-    "cores": 4,
+    "cores": 8,
+    "processes": 4,
     "memory": "24GB",
     "walltime": "24:00:00",
     "job_script_prologue": [
@@ -11,7 +11,7 @@
       "conda activate ecopro"
     ],
     "job_directives_skip": [ "--mem" ],
-    "n_workers": 200
+    "n_workers": 50
   },
   "chunks": {
     "easting": 512,
