@@ -25,13 +25,17 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     ds_trn= ds.where(idx, drop=True).compute()
 
     ytrn = ds_trn['tpa'].as_numpy()
-    Xtrn = ds_trn.drop_vars(
+    features = ds_trn.drop_vars(
         ('id', 'fold', 'easting', 'northing', 'year', 'tpa')
-    ).to_array().T
+    )
+    feature_names = list(features.keys())
+    Xtrn = features.to_array().T
     Xtrn, ytrn = filter_inf(Xtrn, ytrn)
 
     rf = RandomForestRegressor(max_depth=5)
     rf.fit(Xtrn, ytrn)
+
+    importances = dict(zip(feature_names, rf.feature_importances_))
 
     idx = (ds['fold'] == held_out_fold).compute()
     ds_tst = ds.where(idx, drop=True).compute()
@@ -58,11 +62,13 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     targets[year_idx, id_idx] = ytst
 
     return {
+        'fold': held_out_fold,
         'train_year': training_year,
         'years': year_unq,
         'ids': id_unq,
         'predictions': predictions,
         'targets': targets,
+        'importances': importances,
     }
 
 
@@ -90,8 +96,11 @@ def main(trainingfile, resultfile):
 
     results = ray.get(tasks)
 
+    feature_names = sorted(results[0]['importances'].keys())
+
     predictions = np.zeros((len(years), len(years), len(ids)))
     targets = np.zeros((len(years), len(years), len(ids)))
+    importances = np.zeros((len(years), len(folds), len(feature_names)))
 
     for r in tqdm(results, 'Merging results'):
         tyear_idx = np.searchsorted(years, r['train_year'])
@@ -101,11 +110,19 @@ def main(trainingfile, resultfile):
             predictions[tyear_idx, y, id_idx] = p
             targets[tyear_idx, y, id_idx] = t
 
+        fold_idx = np.searchsorted(folds, r['fold'])
+        importances[tyear_idx, fold_idx, :] = np.array(
+            [r['importances'][n] for n in feature_names]
+        )
+
     out = {
         'ids': ids,
         'years': years,
         'predictions': predictions,
         'targets': targets,
+        'importances': importances,
+        'feature_names': np.asarray(feature_names),
+        'folds': np.asarray(folds),
     }
 
     np.savez_compressed(resultfile, **out)
