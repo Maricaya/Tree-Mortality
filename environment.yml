@@ -21,3 +21,4 @@ dependencies:
   - fiona
   - scikit-learn
   - geopandas
+  - ray-default

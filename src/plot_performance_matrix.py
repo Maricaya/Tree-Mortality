@@ -13,16 +13,25 @@ from sklearn.metrics import (
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+PiYG = plt.get_cmap('PiYG')
+PiYG.set_bad(color=PiYG(0))
+
 
 PLOT_KWARGS = {
     'r2': {
-        'cmap': 'PiYG',
+        'cmap': PiYG,
         'im_kw': dict(vmin=-1, vmax=1),
+        'include_values': True,
     },
     'rmse': {
         'cmap': 'plasma',
         'im_kw': dict(vmin=0),
+        'include_values': True,
     },
+}
+PLOT_TITLES = {
+    'r2': 'R$^2$',
+    'rmse': 'RMSE',
 }
 
 
@@ -66,16 +75,17 @@ def main(resultfile, outputfile):
     figs = []
     for mname, matrix in sorted(matrices.items()):
 
-        fig = plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=(8, 6))
         figs.append(fig)
         ax = fig.add_subplot(111)
 
-        disp = ConfusionMatrixDisplay(matrix, display_labels=years)
+        M = np.ma.masked_where(matrix <= -1, matrix)
+        disp = ConfusionMatrixDisplay(M, display_labels=years)
         disp.plot(ax=ax, **PLOT_KWARGS[mname])
 
         ax.set_xlabel('Testing Year', fontsize=15)
         ax.set_ylabel('Training Year', fontsize=15)
-        ax.set_title(mname.upper(), fontsize=18)
+        ax.set_title(PLOT_TITLES[mname], fontsize=18)
 
     with PdfPages(outputfile) as pdf:
         for fig in figs:
