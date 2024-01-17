@@ -25,7 +25,7 @@ def get_features(clim, year, feature_info):
     return features
 
 
-def to_samples(mort, clim, year, feature_info):
+def to_samples(mort, clim, year, feature_info, target):
 
     # Make a new variable to hold copy of the year for each cell
     year_var = mort['id'].copy().rename('year_copy')
@@ -37,7 +37,7 @@ def to_samples(mort, clim, year, feature_info):
         year_var,
         mort['id'],
         mort['fold'],
-        mort['tpa'].sel(year=year),
+        mort[target].sel(year=year),
     ] + get_features(clim, year, feature_info)
 
     feat_ds = xr.merge(features, join='inner', combine_attrs='drop')
@@ -71,6 +71,7 @@ def main(mortalityfile, climatefile, configfile, outputfile):
     years = config['years']
     finfo = config['features']
     chunks = config['chunks']
+    target = config['target']
 
     mort = xr.open_zarr(mortalityfile)
     clim = xr.open_zarr(climatefile)
@@ -87,14 +88,14 @@ def main(mortalityfile, climatefile, configfile, outputfile):
 
     combined = xr.concat(
         [
-            to_samples(mort, clim, year, finfo)
+            to_samples(mort, clim, year, finfo, target)
             for year in tqdm(list(range(*years)), 'Yearly Features')
         ],
         dim='sample', coords='all', compat='identical'
     )
 
     print(f'Selecting data...')
-    good = combined['tpa'].notnull().compute()
+    good = combined[target].notnull().compute()
     combined = combined.where(good, drop=True)
 
     write_job = combined.chunk(chunks).to_zarr(
