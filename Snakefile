@@ -14,12 +14,33 @@ rule all_projections:
         )
 
 
-rule convert_projection:
+rule merge_projection:
     input:
-        op.join(projdir, '{model}', '{scenario}')
+        expand(
+            op.join(
+                projdir, '{{model}}', '{{scenario}}',
+                '{var}_{{model}}_{{scenario}}.nc4'
+            ),
+            var=config['bcm_variables'],
+        )
     output:
         directory(op.join(projdir, '{model}', '{scenario}.zarr'))
+    shell:
+        "python src/merge_projections.py {input} {output}"
+
+
+rule convert_projection:
+    input:
+        op.join(
+            projdir, '{model}', '{scenario}',
+            '{var}_{model}_{scenario}.zip'
+        )
+    output:
+        op.join(
+            projdir, '{model}', '{scenario}',
+            '{var}_{model}_{scenario}.nc4'
+        )
     params:
         config['bcm_config']
-    script:
+    shell:
         "python src/convert_projections.py {input} {params} {output}"

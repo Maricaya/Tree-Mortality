@@ -8,19 +8,31 @@ projections_subdir: 'projections/BCM'
 
 bcm_config: 'config/bcm_v8.json'
 
+bcm_variables:
+    - aet
+    - cwd
+    - pck
+    - pet
+    - ppt
+    - rch
+    - run
+    - str
+    - tmn
+    - tmx
+
 # Climate Projections
 
 projection_scenarios:
     #- HST
-    - RCP45
+    #- RCP45
     - RCP85
 
 projection_models:
-    #- ACCESS1-0
-    #- CCSM4
-    #- CESM1-BGC
-    #- CMCC-CMS
-    #- CNRM-CM5
+    - ACCESS1-0
+    - CCSM4
+    - CESM1-BGC
+    - CMCC-CMS
+    - CNRM-CM5
     - CanESM2
     - GFDL-CM3
-    #- HadGEM2-ES
+    - HadGEM2-ES

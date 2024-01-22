@@ -3,3 +3,4 @@
 *.nc
 *.nc4
 *.sw*
+.snakemake

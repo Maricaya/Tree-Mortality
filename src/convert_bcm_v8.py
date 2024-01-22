@@ -27,7 +27,7 @@ def load_config(configfile):
 
 def parse_file_info(vinfo, path):
     base = os.path.splitext(os.path.basename(path))[0]
-    match = re.match(FILE_RE, base)
+    match = re.match(FILE_RE, base.lower())
     if match is None:
         raise ValueError(f'Unexpected file name format: "{base}"')
 
