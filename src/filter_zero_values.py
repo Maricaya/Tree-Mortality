@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import click
+import json
 import xarray as xr
 from pathlib import Path
 from dask.diagnostics import ProgressBar
@@ -9,10 +10,19 @@ from dask.diagnostics import ProgressBar
 @click.argument('trainingfile', type=click.Path(
     path_type=Path, exists=True
 ))
+@click.argument('configfile', type=click.Path(
+    path_type=Path, exists=True
+))
 @click.argument('outputfile', type=click.Path(
     path_type=Path, exists=False
 ))
-def main(trainingfile, outputfile):
+def main(trainingfile, configfile, outputfile):
+
+    # Load config
+    with open(configfile, 'r') as f:
+        config = json.load(f)
+
+    target = config['target']
 
     ds = xr.open_zarr(trainingfile)
     chunks = {
@@ -20,7 +30,7 @@ def main(trainingfile, outputfile):
     }
 
     print(f'Selecting data...')
-    new = ds.where((ds.tpa > 0).compute(), drop=True)
+    new = ds.where((ds[target] > 0).compute(), drop=True)
     print('...done.')
 
     write_job = new.chunk(chunks).to_zarr(

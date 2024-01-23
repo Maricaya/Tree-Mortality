@@ -3,10 +3,14 @@
 
 root_dir: '/Volumes/Earth02/ecopro'
 projections_subdir: 'projections/BCM'
+mortality_subdir: 'tree_mortality'
 
 # Script Configuration Files
 
 bcm_config: 'config/bcm_v8.json'
+mort_config: 'config/tree_mortality.json'
+mort_fold_config: 'config/tree_mortality_folds.json'
+mort_trainset_config: 'config/training_features.json'
 
 bcm_variables:
     - aet
