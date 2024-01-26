@@ -1,6 +1,6 @@
 {
   "grid_size": 100,
-  "shuffle": false,
+  "shuffle": true,
   "chunks": {
     "year": -1,
     "northing": 512,

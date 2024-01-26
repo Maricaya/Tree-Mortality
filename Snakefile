@@ -24,7 +24,21 @@ mort_training = op.join(
 mort_training_nonzero = op.join(
     mortdir, 'generated', 'tree_mortality_training_nonzero.zarr'
 )
-mortfiles = [mort, mort_folds, mort_training, mort_training_nonzero]
+
+mort_rand_folds = op.join(
+    mortdir, 'generated', 'tree_mortality_random_folds.zarr'
+)
+mort_rand_training = op.join(
+    mortdir, 'generated', 'tree_mortality_random_training.zarr'
+)
+mort_rand_training_nonzero = op.join(
+    mortdir, 'generated', 'tree_mortality_random_training_nonzero.zarr'
+)
+
+mortfiles = [
+    mort, mort_folds, mort_training, mort_training_nonzero,
+    mort_rand_folds, mort_rand_training, mort_rand_training_nonzero
+]
 
 
 rule all_mortality:
@@ -46,6 +60,13 @@ rule nonzero_mortality:
         "python src/filter_zero_values.py {input} {params} {output}"
 
 
+use rule nonzero_mortality as nonzero_random_mortality with:
+    input:
+        mort_rand_training
+    output:
+        directory(mort_rand_training_nonzero)
+
+
 rule mortality_training:
     input:
         mort_folds,
@@ -58,6 +79,14 @@ rule mortality_training:
         "python src/construct_training_dataset.py {input} {params} {output}"
 
 
+use rule mortality_training as mortality_random_training with:
+    input:
+        mort_rand_folds,
+        index_dataset
+    output:
+        directory(mort_rand_training)
+
+
 rule mortality_folds:
     input:
         mort
@@ -67,6 +96,13 @@ rule mortality_folds:
         config['mort_fold_config']
     shell:
         "python src/append_folds.py {input} {params} {output}"
+
+
+use rule mortality_folds as mortality_rand_folds with:
+    output:
+        directory(mort_rand_folds)
+    params:
+        config['mort_rand_fold_config']
 
 
 rule mortality:

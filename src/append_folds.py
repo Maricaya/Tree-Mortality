@@ -8,7 +8,7 @@ from pathlib import Path
 from dask.diagnostics import ProgressBar
 
 
-def make_folds(ds, grid_size):
+def make_folds(ds, grid_size, shuffle=False):
     cols = len(ds.easting.values)
     rows = len(ds.northing.values)
     cc = np.arange(cols) // grid_size
@@ -16,6 +16,12 @@ def make_folds(ds, grid_size):
 
     folds = np.zeros((cols, rows), dtype=int) + cc[..., np.newaxis] + rr
     idx = np.arange(cols * rows, dtype=int).reshape((rows, cols)).T
+
+    if shuffle:
+        np.random.seed(0)
+        folds_tmp = folds.ravel()
+        np.random.shuffle(folds_tmp)
+        folds = folds_tmp.reshape((cols, rows))
 
     dataset = xr.Dataset(
         data_vars={
@@ -60,10 +66,11 @@ def main(inputfile, configfile, outputfile):
         config = json.load(f)
     grid_size = config['grid_size']
     chunks = config['chunks']
+    shuffle = config['shuffle']
 
     ds = xr.open_zarr(inputfile)
 
-    folds = make_folds(ds, grid_size)
+    folds = make_folds(ds, grid_size, shuffle)
 
     new_dataset = xr.merge([ds, folds], join='exact')
 
