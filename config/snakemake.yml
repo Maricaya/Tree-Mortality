@@ -8,6 +8,7 @@ mortality_subdir: 'tree_mortality'
 # Script Configuration Files
 
 bcm_config: 'config/bcm_v8.json'
+agg_config: 'config/bcm_v8_aggregation.json'
 mort_config: 'config/tree_mortality.json'
 mort_fold_config: 'config/tree_mortality_folds.json'
 mort_rand_fold_config: 'config/tree_mortality_rand_folds.json'
@@ -29,11 +30,11 @@ bcm_variables:
 
 projection_scenarios:
     #- HST
-    - RCP45
+    #- RCP45
     - RCP85
 
 projection_models:
-    - ACCESS1-0
+    #- ACCESS1-0
     #- CCSM4
     #- CESM1-BGC
     #- CMCC-CMS

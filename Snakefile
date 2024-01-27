@@ -2,7 +2,7 @@ import os.path as op
 
 configfile: "config/snakemake.yml"
 
-ruleorder: convert_projection > to_netcdf
+ruleorder: aggregate_projection > merge_projection > convert_projection > to_netcdf
 
 # Directories
 projdir = op.join(config['root_dir'], config['projections_subdir'])
@@ -119,10 +119,22 @@ rule mortality:
 rule all_projections:
     input:
         expand(
-            op.join(projdir, '{model}', '{scenario}.zarr'),
+            op.join(projdir, '{model}', '{scenario}{suffix}.nc4'),
             model=config['projection_models'],
             scenario=config['projection_scenarios'],
+            suffix=['', '_annual'],
         )
+
+
+rule aggregate_projection:
+    input:
+        op.join(projdir, '{model}', '{scenario}.zarr')
+    output:
+        directory(op.join(projdir, '{model}', '{scenario}_annual.zarr'))
+    params:
+        config['agg_config']
+    shell:
+        "python src/aggregate_bcm_v8.py {input} {params} {output}"
 
 
 rule merge_projection:
