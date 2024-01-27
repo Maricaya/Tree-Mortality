@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import xarray as xr
 from tqdm import tqdm
-from dask.distributed import Client
+from dask.diagnostics import ProgressBar
 
 
 WY_DETLA = np.timedelta64(3, 'M').astype('timedelta64[M]')
@@ -41,25 +41,29 @@ def main(inputfile, configfile, outputfile):
     out_chunks = config['output_chunks']
     aggregation_funcs = config['aggregation']
 
-    client = Client()
-
     with xr.open_zarr(inputfile) as ds:
         ds = ds.chunk(chunks)
+        print('Convert years to water years...')
         ds = ds.reindex(time=to_water_year(ds.time.values))
 
+        print('Apply grouping...')
         grouped = ds.groupby('time.year')
 
+        print('Apply aggregation functions...')
         aggregated = grouped.map(aggregate, **aggregation_funcs)
 
+        print('Chunking data...')
         out_chunks['year'] = len(aggregated.year)
         aggregated = aggregated.chunk(out_chunks)
 
+        print('Creating write job...')
         write_job = aggregated.to_zarr(
             outputfile, mode='w', compute=False, consolidated=True
         )
 
-        print(f'Writing data, view progress: {client.dashboard_link}')
-        write_job.compute()
+        print('Writing output...')
+        with ProgressBar():
+            write_job.compute()
         print('Done')
 
 
