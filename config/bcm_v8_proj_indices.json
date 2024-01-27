@@ -1,29 +1,19 @@
 {
-  "dask_slurm": {
-    "queue": "defq",
-    "cores": 8,
-    "processes": 4,
-    "memory": "24GB",
-    "walltime": "24:00:00",
-    "job_script_prologue": [
-      "source /home/gdoran/.bashrc",
-      "conda deactivate",
-      "conda activate ecopro"
-    ],
-    "job_directives_skip": [ "--mem" ],
-    "n_workers": 50
+  "dask_client": {
+    "n_workers": 7,
+    "memory_limit": "16GB"
   },
   "chunks": {
     "easting": 512,
     "northing": 512,
-    "year": -1
+    "year": 43
   },
   "output_chunks": {
     "easting": 512,
     "northing": 512,
-    "year": -1
+    "year": 43
   },
-  "focal_period": [2006, 2022],
+  "focal_period": [2006, 2099],
   "reference_period": [1980, 2005],
   "spans": [1, 2, 3, 4, 5, 6],
   "time_dim": "year",
@@ -52,7 +42,8 @@
       "params": {
         "chunk": {
           "northing": 256,
-          "easting": 128
+          "easting": 128,
+          "year": -1
         }
       }
     },
@@ -63,7 +54,8 @@
       "params": {
         "chunk": {
           "northing": 256,
-          "easting": 128
+          "easting": 128,
+          "year": -1
         }
       }
     }

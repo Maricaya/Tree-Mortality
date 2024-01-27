@@ -5,11 +5,13 @@
   },
   "chunks": {
     "easting": 512,
-    "northing": 512
+    "northing": 512,
+    "year": -1
   },
   "output_chunks": {
     "easting": 512,
-    "northing": 512
+    "northing": 512,
+    "year": -1
   },
   "focal_period": [2006, 2022],
   "reference_period": [1980, 2005],

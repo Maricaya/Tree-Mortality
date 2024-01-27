@@ -154,7 +154,10 @@ def make_indices(ds, span, focal_period, reference_period, indices, time_dim='ye
 @click.argument('outputfile', type=click.Path(
     path_type=Path, exists=False
 ))
-def main(inputfile, configfile, outputfile):
+@click.option('-r', '--reference', type=click.Path(
+    path_type=Path, exists=False
+), default=None)
+def main(inputfile, configfile, outputfile, reference):
 
     with open(configfile, 'r') as f:
         config = json.load(f)
@@ -176,35 +179,61 @@ def main(inputfile, configfile, outputfile):
         # Start Dask client for monitoring
         client = Client(**dask_client)
 
-    with xr.open_zarr(inputfile) as ds:
+    ds = xr.open_zarr(inputfile)
+    # Re-chunk data
+    ds = ds.chunk(chunks)
 
-        # Re-chunk data
-        chunks[time_dim] = len(ds[time_dim])
+    if reference is not None:
+        dsref = xr.open_zarr(reference)
+
+        # Re-chunk reference data
+        dsref = dsref.chunk(chunks)
+
+        ds = ds.assign_coords(
+            easting=np.round(ds.easting.values, 4),
+            northing=np.round(ds.northing.values, 4),
+        )
+        dsref = dsref.assign_coords(
+            easting=np.round(dsref.easting.values, 4),
+            northing=np.round(dsref.northing.values, 4),
+        )
+
+        ds = xr.concat(
+            [
+                dsref.sel({ time_dim: slice(*reference_period) }),
+                ds.sel({ time_dim: slice(*focal_period) }),
+            ],
+            dim=time_dim,
+            data_vars='all',
+            coords='all',
+            join='inner'
+        )
+        ds.rio.write_crs(dsref.rio.crs, inplace=True)
+
         ds = ds.chunk(chunks)
 
-        orig = ds.sel({ time_dim: slice(*focal_period) })
+    orig = ds.sel({ time_dim: slice(*focal_period) })
 
-        all_indices = [orig]
-        for span in tqdm(spans, 'Computing Span Indices'):
-            all_indices += make_indices(
-                ds, span, focal_period, reference_period, indices,
-                time_dim=time_dim
-            )
-
-        indices_ds = xr.merge(
-            all_indices, combine_attrs='drop_conflicts'
-        )
-        out_chunks[time_dim] = len(indices_ds[time_dim])
-        indices_ds = indices_ds.chunk(out_chunks)
-        print(indices_ds)
-
-        write_job = indices_ds.to_zarr(
-            outputfile, mode='w', compute=False, consolidated=True
+    all_indices = [orig]
+    for span in tqdm(spans, 'Computing Span Indices'):
+        all_indices += make_indices(
+            ds, span, focal_period, reference_period, indices,
+            time_dim=time_dim
         )
 
-        print(f'Writing data, view progress: {client.dashboard_link}')
-        write_job.compute()
-        print('Done')
+    indices_ds = xr.merge(
+        all_indices, combine_attrs='drop_conflicts'
+    )
+    indices_ds = indices_ds.chunk(out_chunks)
+    print(indices_ds)
+
+    write_job = indices_ds.to_zarr(
+        outputfile, mode='w', compute=False, consolidated=True
+    )
+
+    print(f'Writing data, view progress: {client.dashboard_link}')
+    write_job.compute()
+    print('Done')
 
 
 if __name__ == '__main__':
