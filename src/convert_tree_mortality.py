@@ -17,7 +17,7 @@ def load_config(configfile):
         return json.load(f)
 
 
-def load_variable(fname, vinfo, start_year):
+def load_variable(fname, vinfo, years):
     invar = vinfo.pop('input')
     name = vinfo.pop('name')
 
@@ -29,7 +29,6 @@ def load_variable(fname, vinfo, start_year):
     del var.attrs['grid_mapping']
 
     # Insert year values in coordinate axis
-    years = np.arange(start_year, start_year + len(var.time.values))
     var = var.assign_coords(time=years).rename({ 'time': 'year' })
 
     return var
@@ -101,7 +100,7 @@ def apply_masks(dataset, region_df_dict, default_region_df, years):
 def main(datadir, configfile, outputfile):
 
     config = load_config(configfile)
-    start_year = config['start_year']
+    years = config['years']
     vinfo = config['variables']
     chunks = config['chunks']
     pstr = config['projection']
@@ -111,7 +110,7 @@ def main(datadir, configfile, outputfile):
     variables = []
     for fname, vi in tqdm(list(vinfo.items()), 'Loading Variables'):
         path = os.path.join(datadir, fname)
-        variables.append(load_variable(path, vi, start_year))
+        variables.append(load_variable(path, vi, years))
 
     dataset = xr.merge(variables, join='exact', combine_attrs='drop')
     years = dataset.year.values

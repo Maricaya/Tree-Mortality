@@ -1,25 +1,35 @@
 {
   "features": {
     "PR": {
-      "lags": 6,
+      "cumulative": 6,
       "back": 6
     },
     "PRET": {
-      "lags": 6,
+      "cumulative": 6,
       "back": 6
     },
     "SPI": {
-      "lags": 6,
+      "cumulative": 6,
       "back": 6
     },
     "SPEI": {
-      "lags": 6,
+      "cumulative": 6,
       "back": 6
     }
   },
   "target": "tpa",
-  "years": [2012, 2021],
+  "years": [
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2021
+  ],
   "chunks": {
-    "sample": 4194304
+    "sample": -1
   }
 }

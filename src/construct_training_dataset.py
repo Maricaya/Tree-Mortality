@@ -15,8 +15,8 @@ def get_features(clim, year, feature_info):
     for fbase, finfo in feature_info.items():
         for b in range(finfo['back']):
             cyear = clim.sel(year=(year - b)).assign_coords(year=[year])
-            for l in range(1, finfo['lags'] + 1):
-                fname = f'{fbase}{l}'
+            for c in range(1, finfo['cumulative'] + 1):
+                fname = f'{fbase}{c}'
                 new_name = f'{fname}-{b+1}'
                 features.append(
                     cyear[fname].rename(new_name)
@@ -89,7 +89,7 @@ def main(mortalityfile, climatefile, configfile, outputfile):
     combined = xr.concat(
         [
             to_samples(mort, clim, year, finfo, target)
-            for year in tqdm(list(range(*years)), 'Yearly Features')
+            for year in tqdm(years, 'Yearly Features')
         ],
         dim='sample', coords='all', compat='identical'
     )
