@@ -98,7 +98,7 @@ rule mortality_folds:
         "python src/append_folds.py {input} {params} {output}"
 
 
-use rule mortality_folds as mortality_rand_folds with:
+use rule mortality_folds as mortality_random_folds with:
     output:
         directory(mort_rand_folds)
     params:
