@@ -11,10 +11,13 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error as mse, r2_score
 
 
-def filter_inf(X, y, fill=1e2):
+def filter_inf(X, y=None, fill=1e2):
     assert not np.any(np.isnan(X))
     Xnew = np.nan_to_num(X, neginf=-fill, posinf=fill)
-    return Xnew, y
+    if y is None:
+        return Xnew
+    else:
+        return Xnew, y
 
 
 @ray.remote
