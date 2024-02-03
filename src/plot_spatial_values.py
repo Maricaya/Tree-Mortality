@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import PIL
 import json
 import click
 import numpy as np
@@ -10,6 +11,10 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+
+
+# Required for large high-res background image
+PIL.Image.MAX_IMAGE_PIXELS = 250000000
 
 
 @click.command()
@@ -35,6 +40,7 @@ def main(datafile, year, configfile, outputfile):
     plot_kwargs = config.get('plot_kwargs', {})
     cbar_kwargs = config.get('cbar_kwargs', {})
     cbar_label = config['cbar_label']
+    background_kwargs = config.get('background_kwargs', None)
     savefig_kwargs = config.get('savefig_kwargs', {})
 
     ds = xr.open_zarr(datafile)
@@ -55,6 +61,8 @@ def main(datafile, year, configfile, outputfile):
     ax.set_title(f'Year = {year}', fontsize=fontsize['title'])
     ax.coastlines()
     ax.add_feature(cfeature.STATES.with_scale('50m'))
+    if background_kwargs is not None:
+        ax.background_img(**background_kwargs)
 
     cbar = fig.colorbar(artist, **cbar_kwargs)
     cbar.set_label(**cbar_label)
