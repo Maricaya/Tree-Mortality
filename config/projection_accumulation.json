@@ -1,0 +1,18 @@
+{
+  "statistics": [
+    {
+      "variable": "tpa_projection_median",
+      "statistic": "cumsum",
+      "kwargs": {
+        "skipna": false
+      },
+      "name": "cumulative_tpa_projection_median",
+      "attrs": {}
+    }
+  ],
+  "chunks": {
+    "easting": -1,
+    "northing": -1,
+    "year": 1
+  }
+}
