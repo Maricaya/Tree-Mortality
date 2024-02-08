@@ -1,0 +1,16 @@
+{
+  "statistics": [
+    {
+      "variable": "tpa_projection",
+      "statistic": "median",
+      "kwargs": {},
+      "name": "tpa_projection_median",
+      "attrs": {}
+    }
+  ],
+  "chunks": {
+    "easting": -1,
+    "northing": -1,
+    "year": 1
+  }
+}

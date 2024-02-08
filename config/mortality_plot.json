@@ -1,12 +1,12 @@
 {
-  "value": "tpa_projection",
+  "value": "tpa_projection_median",
   "figsize": [8, 8],
   "fontsize": {
     "title": 20
   },
   "plot_kwargs": {
     "vmin": 0,
-    "vmax": 20,
+    "vmax": 15,
     "cmap": "Reds",
     "alpha": 0.7
   },
