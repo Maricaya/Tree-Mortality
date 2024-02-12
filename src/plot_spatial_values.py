@@ -42,9 +42,19 @@ def main(datafile, year, configfile, outputfile):
     cbar_label = config['cbar_label']
     background_kwargs = config.get('background_kwargs', None)
     savefig_kwargs = config.get('savefig_kwargs', {})
+    nan_to_num_kwargs = config.get('nan_to_num', None)
 
     ds = xr.open_zarr(datafile)
     ds_crs = ccrs.Projection(ds.rio.crs)
+
+    var = ds[value].sel(year=year)
+
+    # Clip infinite values if needed
+    if nan_to_num_kwargs is not None:
+        var = xr.apply_ufunc(
+            np.nan_to_num, var.load(),
+            kwargs=nan_to_num_kwargs,
+        )
 
     fig, ax = plt.subplots(
         1, 1,
@@ -52,7 +62,7 @@ def main(datafile, year, configfile, outputfile):
         subplot_kw=dict(projection=ccrs.Mercator())
     )
     if extent is not None: ax.set_extent(extent, crs=ccrs.PlateCarree())
-    artist = ds[value].sel(year=year).plot(
+    artist = var.plot(
         ax=ax,
         transform=ds_crs,
         add_colorbar=False,

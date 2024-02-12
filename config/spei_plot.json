@@ -1,20 +1,25 @@
 {
-  "value": "cumulative_tpa_projection_median",
+  "value": "SPEI1",
+  "nan_to_num": {
+    "posinf": 1e10,
+    "neginf": -1e10,
+    "nan": NaN
+  },
   "figsize": [8, 8],
   "fontsize": {
     "title": 20
   },
   "plot_kwargs": {
-    "vmin": 0,
-    "vmax": 400,
-    "cmap": "inferno_r",
+    "vmin": -3,
+    "vmax": 3,
+    "cmap": "RdBu",
     "alpha": 0.7
   },
   "cbar_kwargs": {
-    "extend": "max"
+    "extend": "both"
   },
   "cbar_label": {
-    "label": "Cumulative Tree Mortality (trees/acre)",
+    "label": "Standardized Water Balance Index",
     "fontsize": 18
   },
   "extent": [-125, -113, 32, 43],
