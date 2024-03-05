@@ -6,7 +6,7 @@
     "memory": "24GB",
     "walltime": "24:00:00",
     "job_script_prologue": [
-      "source /home/gdoran/.bashrc",
+      "source $HOME/.bashrc",
       "conda deactivate",
       "conda activate ecopro"
     ],
