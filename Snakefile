@@ -9,6 +9,8 @@ projdir = op.join(config['root_dir'], config['projections_subdir'])
 mortdir = op.join(config['root_dir'], config['mortality_subdir'])
 
 # Climate Files
+monthly_dataset = op.join(config['root_dir'], 'BCMv8_monthly.zarr')
+annual_dataset = op.join(config['root_dir'], 'BCMv8_annual.zarr')
 index_dataset = op.join(config['root_dir'], 'BCMv8_indices.zarr')
 
 # Mortality Files
@@ -137,6 +139,24 @@ rule aggregate_projection:
         "python src/aggregate_bcm_v8.py {input} {params} {output}"
 
 
+use rule aggregate_projection as aggregate_bcm with:
+    input:
+        monthly_dataset
+    output:
+        directory(annual_dataset)
+
+
+rule bcm_indexes:
+    input:
+        annual_dataset
+    output:
+        directory(index_dataset)
+    params:
+        config['bcm_ind_config']
+    shell:
+        "python src/append_climate_indices.py {input} {params} {output}"
+
+
 rule merge_projection:
     input:
         expand(
@@ -167,6 +187,17 @@ rule convert_projection:
         config['bcm_config']
     shell:
         "python src/convert_projections.py {input} {params} {output}"
+
+
+rule convert_bcm:
+    input:
+        op.join(config['root_dir'], config['bcm_raw_subdir'])
+    output:
+        directory(monthly_dataset)
+    params:
+        config['bcm_config']
+    shell:
+        "python src/convert_bcm_v8.py {input} {params} {output}"
 
 
 rule to_netcdf:
