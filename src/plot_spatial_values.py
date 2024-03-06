@@ -41,6 +41,7 @@ def main(datafile, year, configfile, outputfile):
     cbar_kwargs = config.get('cbar_kwargs', {})
     cbar_label = config['cbar_label']
     background_kwargs = config.get('background_kwargs', None)
+    facecolor = config.get('facecolor', None)
     savefig_kwargs = config.get('savefig_kwargs', {})
     nan_to_num_kwargs = config.get('nan_to_num', None)
 
@@ -73,6 +74,8 @@ def main(datafile, year, configfile, outputfile):
     ax.add_feature(cfeature.STATES.with_scale('50m'))
     if background_kwargs is not None:
         ax.background_img(**background_kwargs)
+    if facecolor is not None:
+        ax.set_facecolor(facecolor)
 
     cbar = fig.colorbar(artist, **cbar_kwargs)
     cbar.set_label(**cbar_label)
