@@ -1,8 +1,11 @@
 #!/usr/bin/env Rscript
+# Author: Antonio Ferraz
+# Modified by: Gary Doran
+
 library(terra)
 library(sf)
 library(MultiscaleDTM)
-library("optparse")
+library(optparse)
 
 
 option_list = list(
