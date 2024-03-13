@@ -68,6 +68,7 @@ def main(resultfile, outputfile):
             pred = predictions[yi, yj, :]
             true = targets[yi, yj, :]
             metrics[year_i, year_j]['r2'] = r2_score(true, pred)
+            if year_i > year_j: metrics[year_i, year_j]['r2'] = -1
             metrics[year_i, year_j]['rmse'] = mse(true, pred, squared=False)
 
     matrices = get_matrices(years, metrics)
