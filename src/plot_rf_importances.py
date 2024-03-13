@@ -15,18 +15,6 @@ from matplotlib.colors import LogNorm
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-PLOT_KWARGS = {
-    'r2': {
-        'cmap': 'PiYG',
-        'im_kw': dict(vmin=-1, vmax=1),
-    },
-    'rmse': {
-        'cmap': 'plasma',
-        'im_kw': dict(vmin=0),
-    },
-}
-
-
 def get_parts(fname):
     match = re.match('([A-Z]+)([0-9])-([0-9])', fname)
     assert match is not None
@@ -63,20 +51,31 @@ def get_matrices(feature_names, importances):
 @click.argument('outputfile', type=click.Path(
     path_type=Path, exists=False
 ))
-def main(resultfile, outputfile):
+@click.option('-y', '--year', type=int, default=None)
+def main(resultfile, outputfile, year):
 
     metrics = defaultdict(dict)
     results = np.load(resultfile)
     imp = results['importances']
-    importances = np.median(imp.reshape((-1, imp.shape[-1])), axis=0)
+    if year is None:
+        importances = np.median(imp.reshape((-1, imp.shape[-1])), axis=0)
+    else:
+        year_idx = results['years'].tolist().index(year)
+        importances = np.median(imp[year_idx], axis=0)
     fnames = results['feature_names']
 
     I, idxs, cms, lags = get_matrices(fnames, importances)
 
     assert cms == lags
 
+    vmin = 10**-3.5
+    vmax = 0.03
+
     figs = []
     for idx, matrix in zip(idxs, I):
+
+        matrix[matrix < vmin] = vmin
+        matrix[matrix > vmax] = vmax
 
         fig = plt.figure(figsize=(5, 4.5))
         figs.append(fig)
@@ -85,7 +84,7 @@ def main(resultfile, outputfile):
         disp = ConfusionMatrixDisplay(matrix, display_labels=cms)
         disp.plot(
             ax=ax, cmap='plasma', values_format='.0e', include_values=False,
-            im_kw={'norm': LogNorm(vmin=10**-5, vmax=10**-1.5)},
+            im_kw={'norm': LogNorm(vmin=vmin, vmax=vmax)},
         )
 
         ax.images[-1].colorbar.set_label('Feature Importance Fraction', fontsize=15)
