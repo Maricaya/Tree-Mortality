@@ -3,4 +3,11 @@
 *.nc
 *.nc4
 *.sw*
+*.pdf
+*.jpg
+*.mp4
+*.npz
+*.pkl
+*.zarr
+figs
 .snakemake
