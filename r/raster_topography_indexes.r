@@ -21,21 +21,49 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
+print("Reading...")
 r<-rast(opt$inputfile)
 
-print("slope")
-x<-terrain(r, "slope", neighbors=8)
-print("writing output")
-writeRaster(x, opt$outputfile)
-print("done")
+# TODO: Remove
+#r<- r[0:5000, 0:5000, drop=FALSE]
 
+print("...done.")
+
+w <- 3
+
+print(w)
+metrics <- c("slope", "aspect", "eastness", "northness")
+slp_asp <- SlpAsp(
+    r=r, w=c(w, w),
+    unit="degrees",
+    method="queen",
+    metrics=metrics,
+    na.rm=TRUE,
+    include_scale=TRUE
+)
+units(slp_asp) <- c("degrees", "degrees", "n/a", "n/a")
+
+print(slp_asp)
+
+print("Writing...")
+writeCDF(
+    slp_asp, opt$outputfile, overwrite=TRUE, split=TRUE
+)
+print("...done.")
 stop()
 
 
 resolution_vec<-c(3,3)## number of pixels
 ###   https://github.com/ailich/MultiscaleDTM?tab=readme-ov-file#roughness-1
 #Slope, Aspect and Curvature: SlpAsp calculates multi-scale slope and aspect according to Misiuk et al (2021) which is a modification of the traditional 3 x 3 slope and aspect algorithms (Fleming and Hoffer, 1979; Horn et al., 1981; Ritter, 1987)
-slp_asp<- SlpAsp(r = r, w = c(5,5), unit = "degrees", method = "queen", metrics = c("slope", "aspect", "eastness", "northness"), na.rm=TRUE)
+slp_asp<- SlpAsp(
+    r=r, w=c(5,5),
+    unit="degrees",
+    method="queen",
+    metrics=c("slope", "aspect", "eastness", "northness"),
+    na.rm=TRUE,
+    include_scale=TRUE
+)
 
 ## fit calculates slope, aspect, curvature, and morphometric features by fitting a quadratic surface to the focal window using ordinary least squares
 ## qmetrics<- Qfit(r, w = c(5,5), unit = "degrees", metrics = c("elev", "qslope", "qaspect", "qeastness", "qnorthness", "profc", "planc", "twistc", "meanc", "maxc", "minc", "features"), na.rm = TRUE)
