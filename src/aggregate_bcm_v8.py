@@ -44,7 +44,7 @@ def main(inputfile, configfile, outputfile):
     with xr.open_zarr(inputfile) as ds:
         ds = ds.chunk(chunks)
         print('Convert years to water years...')
-        ds = ds.reindex(time=to_water_year(ds.time.values))
+        ds = ds.assign_coords(time=to_water_year(ds.time.values))
 
         print('Apply grouping...')
         grouped = ds.groupby('time.year')
