@@ -127,7 +127,7 @@ def main(datadir, configfile, outputfile):
     chunks = config['chunks']
     pstr = config['projection']
 
-    zip_files = sorted(glob(os.path.join(datadir, '*', '*.zip')))
+    zip_files = sorted(glob(os.path.join(datadir, '*.zip')))
 
     datasets = defaultdict(dict)
 
@@ -158,8 +158,13 @@ def main(datadir, configfile, outputfile):
 
     dataset.rio.write_crs(pstr, inplace=True)
 
-    write_job = dataset.to_zarr(
-        outputfile, mode='w', compute=False, consolidated=True
+    # Add compression to encoding
+    comp = dict(zlib=True, complevel=9)
+    for v in dataset.data_vars:
+        dataset[v].encoding.update(comp)
+
+    write_job = dataset.to_netcdf(
+        outputfile, engine='h5netcdf', compute=False
     )
 
     with ProgressBar():

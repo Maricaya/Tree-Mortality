@@ -4,6 +4,7 @@
 root_dir: '/Volumes/Earth02/ecopro'
 projections_subdir: 'projections/BCM'
 mortality_subdir: 'tree_mortality'
+bcm_subdir: 'bcm'
 bcm_raw_subdir: 'BCMv8_zip'
 
 # Script Configuration Files

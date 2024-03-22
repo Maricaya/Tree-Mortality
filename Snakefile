@@ -7,11 +7,12 @@ ruleorder: aggregate_projection > merge_projection > convert_projection > to_net
 # Directories
 projdir = op.join(config['root_dir'], config['projections_subdir'])
 mortdir = op.join(config['root_dir'], config['mortality_subdir'])
+bcmdir = op.join(config['root_dir'], config['bcm_subdir'])
 
 # Climate Files
-monthly_dataset = op.join(config['root_dir'], 'BCMv8_monthly.zarr')
-annual_dataset = op.join(config['root_dir'], 'BCMv8_annual.zarr')
-index_dataset = op.join(config['root_dir'], 'BCMv8_indices.zarr')
+monthly_dataset = op.join(bcmdir, 'BCMv8_monthly.zarr')
+annual_dataset = op.join(bcmdir, 'BCMv8_annual.zarr')
+index_dataset = op.join(bcmdir, 'BCMv8_indices.zarr')
 
 # Mortality Files
 mort = op.join(
@@ -189,11 +190,29 @@ rule convert_projection:
         "python src/convert_projections.py {input} {params} {output}"
 
 
-rule convert_bcm:
+rule merge_bcm:
     input:
-        op.join(config['root_dir'], config['bcm_raw_subdir'])
+        expand(
+            op.join(
+                bcmdir, config['bcm_raw_subdir'],
+                '{var}.nc4'
+            ),
+            var=config['bcm_variables']
+        )
     output:
         directory(monthly_dataset)
+    shell:
+        "python src/merge_projections.py {input} {output}"
+
+
+rule convert_bcm:
+    input:
+        op.join(bcmdir, config['bcm_raw_subdir'], '{var}')
+    output:
+        op.join(
+            bcmdir, config['bcm_raw_subdir'],
+            '{var}.nc4'
+        )
     params:
         config['bcm_config']
     shell:
