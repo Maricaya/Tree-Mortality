@@ -12,7 +12,7 @@ bcmdir = op.join(config['root_dir'], config['bcm_subdir'])
 # Climate Files
 monthly_dataset = op.join(bcmdir, 'BCMv8_monthly.zarr')
 annual_dataset = op.join(bcmdir, 'BCMv8_annual.zarr')
-index_dataset = op.join(bcmdir, 'BCMv8_indices.zarr')
+index_dataset = op.join(bcmdir, 'BCMv8_indexes.zarr')
 
 # Mortality Files
 mort = op.join(
@@ -155,7 +155,7 @@ rule bcm_indexes:
     params:
         config['bcm_ind_config']
     shell:
-        "python src/append_climate_indices.py {input} {params} {output}"
+        "python src/append_climate_indexes.py {input} {params} {output}"
 
 
 rule merge_projection:
