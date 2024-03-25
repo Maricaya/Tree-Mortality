@@ -8,6 +8,8 @@ ruleorder: aggregate_projection > merge_projection > convert_projection > to_net
 projdir = op.join(config['root_dir'], config['projections_subdir'])
 mortdir = op.join(config['root_dir'], config['mortality_subdir'])
 bcmdir = op.join(config['root_dir'], config['bcm_subdir'])
+resultsdir = op.join(config['root_dir'], config['results_subdir'])
+figuresdir = op.join(config['root_dir'], config['figures_subdir'])
 
 # Climate Files
 monthly_dataset = op.join(bcmdir, 'BCMv8_monthly.zarr')
@@ -42,6 +44,24 @@ mortfiles = [
     mort, mort_folds, mort_training, mort_training_nonzero,
     mort_rand_folds, mort_rand_training, mort_rand_training_nonzero
 ]
+
+# Result Files
+tm_results = op.join(resultsdir, 'tree_mortality_loo.npz')
+tm_random_results = op.join(resultsdir, 'tree_mortality_random_loo.npz')
+
+
+rule all_training:
+    input:
+        tm_results
+
+
+rule train_model:
+    input:
+        op.join(mortdir, 'generated', '{base}_training.zarr')
+    output:
+        op.join(resultsdir, '{base}_loo.npz')
+    shell:
+        "python src/train_rf_model_ray.py {input} {output}"
 
 
 rule all_mortality:

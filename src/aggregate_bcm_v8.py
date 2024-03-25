@@ -17,7 +17,7 @@ def to_water_year(dt):
 
 def aggregate(ds, **kwargs):
     return xr.merge([
-        getattr(ds[var], afunc)(dim='time', skipna=False)
+        getattr(ds[var], afunc)(dim='time', skipna=False, keep_attrs=True)
         for var, afunc in kwargs.items()
     ], combine_attrs='drop_conflicts')
 
