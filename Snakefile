@@ -2,7 +2,7 @@ import os.path as op
 
 configfile: "config/snakemake.yml"
 
-ruleorder: aggregate_projection > merge_projection > convert_projection > to_netcdf
+ruleorder: projection_indexes > aggregate_projection > merge_projection > convert_projection > to_netcdf
 
 # Directories
 projdir = op.join(config['root_dir'], config['projections_subdir'])
@@ -145,8 +145,21 @@ rule all_projections:
             op.join(projdir, '{model}', '{scenario}{suffix}.nc4'),
             model=config['projection_models'],
             scenario=config['projection_scenarios'],
+            #suffix=['', '_annual', '_indexes'],
             suffix=['', '_annual'],
         )
+
+
+rule projection_indexes:
+    input:
+        op.join(projdir, '{model}', '{scenario}_annual.zarr')
+    output:
+        directory(op.join(projdir, '{model}', '{scenario}_indexes.zarr'))
+    params:
+        conf=config['bcm_proj_ind_config'],
+        ref=annual_dataset
+    shell:
+        "python src/append_climate_indexes.py {input} {params.conf} {output} -r {params.ref}"
 
 
 rule aggregate_projection:
