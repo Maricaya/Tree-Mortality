@@ -5,6 +5,7 @@ root_dir: '/Volumes/Earth02/ecopro'
 projections_subdir: 'projections/BCM'
 mortality_subdir: 'tree_mortality'
 bcm_subdir: 'bcm'
+topo_subdir: 'topo'
 bcm_raw_subdir: 'BCMv8_zip'
 results_subdir: 'results'
 figures_subdir: 'figures'
@@ -19,6 +20,7 @@ mort_config: 'config/tree_mortality.json'
 mort_fold_config: 'config/tree_mortality_folds.json'
 mort_rand_fold_config: 'config/tree_mortality_rand_folds.json'
 mort_trainset_config: 'config/training_features.json'
+topo_config: 'config/topo_variables.json'
 
 bcm_variables:
     - aet
@@ -49,3 +51,6 @@ projection_models:
     - GFDL-CM3
     - HadGEM2-ES
     - MIROC5
+
+# Topography
+topobase: 'SRTM_SierraConservancy_3310_.tif'

@@ -10,6 +10,7 @@ mortdir = op.join(config['root_dir'], config['mortality_subdir'])
 bcmdir = op.join(config['root_dir'], config['bcm_subdir'])
 resultsdir = op.join(config['root_dir'], config['results_subdir'])
 figuresdir = op.join(config['root_dir'], config['figures_subdir'])
+topodir = op.join(config['root_dir'], config['topo_subdir'])
 
 # Climate Files
 monthly_dataset = op.join(bcmdir, 'BCMv8_monthly.zarr')
@@ -31,6 +32,11 @@ mortfiles = [
     mort, mort_folds, mort_training, mort_training_nonzero,
     mort_rand_folds, mort_rand_training, mort_rand_training_nonzero
 ]
+
+# Topography Files
+topo_gen = op.join(topodir, 'generated')
+topofile = op.join(topodir, 'topo_indexes.zarr')
+demfile = op.join(topodir, config['topobase'])
 
 # Result Files
 tm_results = op.join(resultsdir, 'tree_mortality_loo.npz')
@@ -124,6 +130,23 @@ rule mortality:
         config['mort_config']
     shell:
         "python src/convert_tree_mortality.py {input} {params} {output}"
+
+
+rule topo:
+    input:
+        dem=demfile,
+        bcm=annual_dataset
+    output:
+        topofile
+    params:
+        outdir=topo_gen,
+        conf=config['topo_config']
+    shell:
+        """
+        mkdir -p {params.outdir}
+        Rscript r/raster_topography_indexes.r -i {input.dem} -o {params.outdir}
+        python src/merge_topo_features.py {params.outdir}/*.nc {input.bcm} {params.conf} {output}
+        """
 
 
 rule all_projections:
