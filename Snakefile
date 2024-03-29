@@ -17,28 +17,15 @@ annual_dataset = op.join(bcmdir, 'BCMv8_annual.zarr')
 index_dataset = op.join(bcmdir, 'BCMv8_indexes.zarr')
 
 # Mortality Files
-mort = op.join(
-    mortdir, 'generated', 'tree_mortality.zarr'
-)
-mort_folds = op.join(
-    mortdir, 'generated', 'tree_mortality_folds.zarr'
-)
-mort_training = op.join(
-    mortdir, 'generated', 'tree_mortality_training.zarr'
-)
-mort_training_nonzero = op.join(
-    mortdir, 'generated', 'tree_mortality_training_nonzero.zarr'
-)
+def mortfile(base): return op.join(mortdir, 'generated', base)
 
-mort_rand_folds = op.join(
-    mortdir, 'generated', 'tree_mortality_random_folds.zarr'
-)
-mort_rand_training = op.join(
-    mortdir, 'generated', 'tree_mortality_random_training.zarr'
-)
-mort_rand_training_nonzero = op.join(
-    mortdir, 'generated', 'tree_mortality_random_training_nonzero.zarr'
-)
+mort = mortfile('tree_mortality.zarr')
+mort_folds = mortfile('tree_mortality_folds.zarr')
+mort_training = mortfile('tree_mortality_training.zarr')
+mort_training_nonzero = mortfile('tree_mortality_training_nonzero.zarr')
+mort_rand_folds = mortfile('tree_mortality_random_folds.zarr')
+mort_rand_training = mortfile('tree_mortality_random_training.zarr')
+mort_rand_training_nonzero = mortfile('tree_mortality_random_training_nonzero.zarr')
 
 mortfiles = [
     mort, mort_folds, mort_training, mort_training_nonzero,
