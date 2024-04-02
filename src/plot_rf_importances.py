@@ -17,7 +17,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 def get_parts(fname):
     match = re.match('([A-Z]+)([0-9])-([0-9])', fname)
-    assert match is not None
+    if match is None:
+        raise ValueError(f'"{fname}" does not match expected format')
     idx = match.group(1)
     cm = int(match.group(2))
     lag = int(match.group(3))
@@ -66,7 +67,8 @@ def main(resultfile, outputfile, year):
 
     I, idxs, cms, lags = get_matrices(fnames, importances)
 
-    assert cms == lags
+    if cms != lags:
+        raise NotImplementedError(f'Cumulative years must equal lag years')
 
     vmin = 10**-3.5
     vmax = 0.03

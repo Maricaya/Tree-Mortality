@@ -12,7 +12,8 @@ from sklearn.metrics import mean_squared_error as mse, r2_score
 
 
 def filter_inf(X, y=None, fill=1e2):
-    assert not np.any(np.isnan(X))
+    if np.any(np.isnan(X)):
+        raise ValueError('NaN entries present but not handled')
     Xnew = np.nan_to_num(X, neginf=-fill, posinf=fill)
     if y is None:
         return Xnew

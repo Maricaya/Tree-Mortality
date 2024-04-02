@@ -64,7 +64,9 @@ def read_archive(vinfo, zipfile, chunks):
             with zf.open(name) as ah, rio.MemoryFile(ah) as af:
                 vname, date, ds = read_file(vinfo, name, af)
 
-                assert last_vname is None or last_vname == vname
+                if (last_vname is not None) and last_vname != vname:
+                    raise ValueError(f'Variable name mismatch: {last_vname} != {vname}')
+
                 last_vname = vname
 
                 months[date] = ds
@@ -85,7 +87,9 @@ def read_file(vinfo, ascfilename, ascmemfile):
         easting, _ = src.xy(np.zeros(cs.shape), cs)
         _, northing = src.xy(rs, np.zeros(rs.shape))
 
-        assert src.count == 1
+        if src.count != 1:
+            raise ValueError(f'Expected 1 entry, encountered {src.count}')
+
         data = src.read(1)
 
         data[data == src.nodata] = np.nan
