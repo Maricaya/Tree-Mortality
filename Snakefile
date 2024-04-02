@@ -2,7 +2,9 @@ import os.path as op
 
 configfile: "config/snakemake.yml"
 
-ruleorder: projection_indexes > aggregate_projection > merge_projection > convert_projection > to_netcdf
+ruleorder: bcm_indexes > merge_bcm > convert_bcm > \
+    projection_indexes > aggregate_projection > \
+    merge_projection > convert_projection > to_netcdf
 
 # Directories
 projdir = op.join(config['root_dir'], config['projections_subdir'])
@@ -134,19 +136,23 @@ rule mortality:
 
 rule topo:
     input:
-        dem=demfile,
+        features=topo_gen,
         bcm=annual_dataset
     output:
-        topofile
+        directory(topofile)
     params:
-        outdir=topo_gen,
         conf=config['topo_config']
     shell:
-        """
-        mkdir -p {params.outdir}
-        Rscript r/raster_topography_indexes.r -i {input.dem} -o {params.outdir}
-        python src/merge_topo_features.py {params.outdir}/*.nc {input.bcm} {params.conf} {output}
-        """
+        "python src/merge_topo_features.py {input.features}/*.nc {input.bcm} {params.conf} {output}"
+
+
+rule topo_features:
+    input:
+        demfile
+    output:
+        directory(topo_gen)
+    shell:
+        "Rscript r/raster_topography_indexes.r -i {input} -o {output}"
 
 
 rule all_projections:
@@ -188,6 +194,14 @@ use rule aggregate_projection as aggregate_bcm with:
         monthly_dataset
     output:
         directory(annual_dataset)
+
+
+rule all_bcm:
+    input:
+        expand(
+            op.join(bcmdir, 'BCMv8_{suffix}.nc4'),
+            suffix=['monthly', 'annual', 'indexes'],
+        )
 
 
 rule bcm_indexes:

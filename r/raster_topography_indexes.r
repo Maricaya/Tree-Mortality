@@ -10,8 +10,6 @@ library(optparse)
 
 # Use 9x9 window
 w <- 9
-bpi_inner <- 5
-bpi_outer <- 7
 
 
 option_list = list(
@@ -30,6 +28,15 @@ opt = parse_args(opt_parser);
 
 print("Reading...")
 r <- rast(opt$inputfile)
+print("...done.")
+
+
+print("Writing NetCDF...")
+names(r) <- "elevation"
+outputfile <- file.path(opt$outputdir, 'elevation.nc')
+writeCDF(
+    r, outputfile, overwrite=TRUE, split=TRUE
+)
 print("...done.")
 
 
@@ -88,18 +95,6 @@ writeCDF(
     rie, outputfile, overwrite=TRUE, split=TRUE
 )
 print("...done.")
-
-
-## Bathymetric Position Index (Lundblad et al., 2006)
-#print("Computing Bathymetric Position Index...")
-#bpi <- BPI(r=r, w=c(bpi_inner, bpi_outer), unit="cell", stand="sd", na.rm=TRUE)
-#print("...done.")
-#print("Writing...")
-#outputfile <- file.path(opt$outputdir, 'bpi.nc')
-#writeCDF(
-#    bpi, outputfile, overwrite=TRUE, split=TRUE
-#)
-#print("...done.")
 
 
 # Calculates the Surface Area to Planar Area (Jenness, 2004). Rougher surfaces

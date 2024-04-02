@@ -5,6 +5,13 @@
   },
   "variables": [
     {
+      "name": "elevation",
+      "attrs" :{
+        "long_name": "Elevation",
+        "units": "m"
+      }
+    },
+    {
       "name": "adjSD",
       "new_name": "adjsd",
       "attrs" :{
