@@ -2,12 +2,12 @@
 import re
 import ray
 import json
-import pickle
 import click
 import numpy as np
 import xarray as xr
 import rioxarray
 from pathlib import Path
+from skops.io import load
 from dask.diagnostics import ProgressBar
 
 from train_rf_model_ray import filter_inf
@@ -42,7 +42,7 @@ def get_feature(clim, year, feature_name):
 def apply_model(climatefile, modelfile, year):
 
     with open(modelfile, 'rb') as f:
-        model_info = pickle.load(f)
+        model_info = load(f)
 
     features = model_info['features']
     model = model_info['model']

@@ -2,9 +2,9 @@
 import click
 import numpy as np
 import xarray as xr
-from pickle import dump
 from pathlib import Path
 from sklearn.ensemble import RandomForestRegressor
+from skops.io import dump
 
 
 from train_rf_model_ray import filter_inf
