@@ -2,10 +2,10 @@
 import json
 import click
 import xarray as xr
-import os.path as op
 from tqdm import tqdm
 from pathlib import Path
 from itertools import product
+from werkzeug.security import safe_join
 
 
 @click.command()
@@ -36,7 +36,7 @@ def main(zarrfile, outputdir, configfile):
 
     for var, year in tqdm(pairs, 'Converting'):
         ofile = file_fmt.format(variable=var, year=year)
-        opath = op.join(outputdir, ofile)
+        opath = safe_join(outputdir, ofile)
 
         da = ds[var]
         dat = da.sel(year=year)

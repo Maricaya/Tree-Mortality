@@ -14,6 +14,7 @@ from pathlib import Path
 from zipfile import ZipFile
 from datetime import datetime
 from collections import defaultdict
+from werkzeug.security import safe_join
 from dask.diagnostics import ProgressBar
 
 
@@ -131,7 +132,7 @@ def main(datadir, configfile, outputfile):
     chunks = config['chunks']
     pstr = config['projection']
 
-    zip_files = sorted(glob(os.path.join(datadir, '*.zip')))
+    zip_files = sorted(glob(safe_join(datadir, '*.zip')))
 
     datasets = defaultdict(dict)
 

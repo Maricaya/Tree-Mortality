@@ -9,6 +9,7 @@ import geopandas as gpd
 import rioxarray as rxr
 from pathlib import Path
 from tqdm import tqdm
+from werkzeug.security import safe_join
 from dask.diagnostics import ProgressBar
 
 
@@ -38,10 +39,10 @@ def load_annual_shapefiles(datadir, shapefile_fmt, default_shapefile, years):
     if default_shapefile is None:
         default_region_df = None
     else:
-        default_region_df = gpd.read_file(os.path.join(datadir, default_shapefile))
+        default_region_df = gpd.read_file(safe_join(datadir, default_shapefile))
 
     annual_shapefiles = [
-        os.path.join(datadir, shapefile_fmt.format(year=y))
+        safe_join(datadir, shapefile_fmt.format(year=y))
         for y in years
     ]
 
@@ -109,7 +110,7 @@ def main(datadir, configfile, outputfile):
 
     variables = []
     for fname, vi in tqdm(list(vinfo.items()), 'Loading Variables'):
-        path = os.path.join(datadir, fname)
+        path = safe_join(datadir, fname)
         variables.append(load_variable(path, vi, years))
 
     dataset = xr.merge(variables, join='exact', combine_attrs='drop')

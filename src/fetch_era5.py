@@ -4,6 +4,7 @@ import click
 import cdsapi
 from tqdm import tqdm
 from pathlib import Path
+from werkzeug.security import safe_join
 
 from convert_bcm_v8 import load_config
 
@@ -29,7 +30,7 @@ def main(configfile, outputdir):
     c = cdsapi.Client()
 
     paths = [
-        (year, os.path.join(outputdir, out_fmt.format(year=year)))
+        (year, safe_join(outputdir, out_fmt.format(year=year)))
         for year in years
     ]
 
