@@ -226,8 +226,10 @@ rule merge_projection:
         )
     output:
         directory(op.join(projdir, '{model}', '{scenario}.zarr'))
+    params:
+        config['bcm_config']
     shell:
-        "python src/merge_projections.py {input} {output}"
+        "python src/merge_projections.py {input} {params} {output}"
 
 
 rule convert_projection:
@@ -258,8 +260,10 @@ rule merge_bcm:
         )
     output:
         directory(monthly_dataset)
+    params:
+        config['bcm_config']
     shell:
-        "python src/merge_projections.py {input} {output}"
+        "python src/merge_projections.py {input} {params} {output}"
 
 
 rule convert_bcm:

@@ -1,12 +1,13 @@
 {
   "chunks": {
     "time": 12,
-    "easting": 512,
-    "northing": 512
+    "easting": -1,
+    "northing": -1
   },
   "output_chunks": {
     "easting": 512,
-    "northing": 512
+    "northing": 512,
+    "year": -1
   },
   "aggregation": {
     "aet": "sum",

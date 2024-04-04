@@ -53,7 +53,6 @@ def main(inputfile, configfile, outputfile):
         aggregated = grouped.map(aggregate, **aggregation_funcs)
 
         print('Chunking data...')
-        out_chunks['year'] = len(aggregated.year)
         aggregated = aggregated.chunk(out_chunks)
 
         print('Creating write job...')
