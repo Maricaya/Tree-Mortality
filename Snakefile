@@ -215,7 +215,24 @@ rule bcm_indexes:
         "python src/append_climate_indexes.py {input} {params} {output}"
 
 
-rule merge_projection:
+rule merge_bcm:
+    input:
+        expand(
+            op.join(
+                bcmdir, config['bcm_raw_subdir'],
+                '{var}.nc4'
+            ),
+            var=config['bcm_variables']
+        )
+    output:
+        directory(monthly_dataset)
+    params:
+        config['bcm_config']
+    shell:
+        "python src/merge_bcm.py {input} {params} {output}"
+
+
+use rule merge_bcm as merge_projection with:
     input:
         expand(
             op.join(
@@ -226,10 +243,20 @@ rule merge_projection:
         )
     output:
         directory(op.join(projdir, '{model}', '{scenario}.zarr'))
+
+
+rule convert_bcm:
+    input:
+        op.join(bcmdir, config['bcm_raw_subdir'], '{var}')
+    output:
+        op.join(
+            bcmdir, config['bcm_raw_subdir'],
+            '{var}.nc4'
+        )
     params:
         config['bcm_config']
     shell:
-        "python src/merge_projections.py {input} {params} {output}"
+        "python src/convert_bcm_v8.py {input} {params} {output}"
 
 
 rule convert_projection:
@@ -247,37 +274,6 @@ rule convert_projection:
         config['bcm_config']
     shell:
         "python src/convert_projections.py {input} {params} {output}"
-
-
-rule merge_bcm:
-    input:
-        expand(
-            op.join(
-                bcmdir, config['bcm_raw_subdir'],
-                '{var}.nc4'
-            ),
-            var=config['bcm_variables']
-        )
-    output:
-        directory(monthly_dataset)
-    params:
-        config['bcm_config']
-    shell:
-        "python src/merge_projections.py {input} {params} {output}"
-
-
-rule convert_bcm:
-    input:
-        op.join(bcmdir, config['bcm_raw_subdir'], '{var}')
-    output:
-        op.join(
-            bcmdir, config['bcm_raw_subdir'],
-            '{var}.nc4'
-        )
-    params:
-        config['bcm_config']
-    shell:
-        "python src/convert_bcm_v8.py {input} {params} {output}"
 
 
 rule to_netcdf:
