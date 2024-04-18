@@ -88,7 +88,8 @@ use rule nonzero_mortality as nonzero_random_mortality with:
 rule mortality_training:
     input:
         mort_folds,
-        index_dataset
+        index_dataset,
+        topofile
     output:
         directory(mort_training)
     params:
@@ -277,6 +278,7 @@ rule convert_projection:
 
 
 rule to_netcdf:
+    priority: -1
     input:
         '{base}.zarr'
     output:
