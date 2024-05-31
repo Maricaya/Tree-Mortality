@@ -6,7 +6,7 @@ from tqdm import tqdm
 from pathlib import Path
 from werkzeug.security import safe_join
 
-from convert_bcm_v8 import load_config
+from util import load_config
 
 
 @click.command()
