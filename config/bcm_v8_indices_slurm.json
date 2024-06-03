@@ -1,6 +1,6 @@
 {
   "dask_slurm": {
-    "queue": "defq",
+    "queue": "compute",
     "cores": 8,
     "processes": 4,
     "memory": "24GB",
