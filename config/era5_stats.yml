@@ -1,0 +1,20 @@
+years: [1980, 2022]
+suffix: nc
+stats:
+  - variable: t2m
+    name: t2m_max
+    function: max
+    attrs:
+      units: K
+      long_name: "maximum 2-meter temperature"
+  - variable: t2m
+    name: t2m_min
+    function: min
+    attrs:
+      units: K
+      long_name: "minimum 2-meter temperature"
+chunks:
+  dayofyear: -1
+  latitude: -1
+  longitude: -1
+  year: 10
