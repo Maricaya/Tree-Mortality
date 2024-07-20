@@ -1,7 +1,7 @@
 
 # Directory Structure
 
-root_dir: '/Volumes/Earth02/ecopro'
+root_dir: '/flexfs/bayesics/xulu/Tree-Mortality'
 projections_subdir: 'projections/BCM'
 mortality_subdir: 'tree_mortality'
 bcm_subdir: 'bcm'
