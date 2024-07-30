@@ -30,11 +30,13 @@ echo "bcm_ind_config: $config_bcm_ind_config"
 bcmdir="${config_root_dir}/${config_bcm_subdir}"
 echo "BCM directory: $bcmdir"
 
+bcm_variables=(aet cwd pck pet ppt rch run str tmn tmx)
+
 # Step 1: Convert BCM
 convert_bcm() {
     echo "Starting convert_bcm function..."
 
-    bcm_variables=(aet cwd pck pet ppt rch run str tmn tmx)
+    
     for var in "${bcm_variables[@]}"; do
         input_file="${bcmdir}/${config_bcm_raw_subdir}/${var}"
         output_file="${bcmdir}/${config_bcm_raw_subdir}/${var}.nc4"
