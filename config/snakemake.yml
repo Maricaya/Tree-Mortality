@@ -1,7 +1,7 @@
 
 # Directory Structure
 
-root_dir: '/flexfs/bayesics/xulu/Tree-Mortality'
+root_dir: '/home/ubuntu/Tree-Mortality/data'
 projections_subdir: 'projections/BCM'
 mortality_subdir: 'tree_mortality'
 bcm_subdir: 'bcm'
@@ -36,21 +36,21 @@ bcm_variables:
 
 # Climate Projections
 
-projection_scenarios:
+projection_scenarios: 'RCP45'
     #- HST
-    - RCP45
-    - RCP85
+#    -
+#    - RCP85
 
-projection_models:
-    - ACCESS1-0
-    - CCSM4
-    - CESM1-BGC
-    - CMCC-CMS
-    - CNRM-CM5
-    - CanESM2
-    - GFDL-CM3
-    - HadGEM2-ES
-    - MIROC5
+projection_models: 'GFDL-CM3'
+#    - ACCESS1-0
+#    - CCSM4
+#    - CESM1-BGC
+#    - CMCC-CMS
+#    - CNRM-CM5
+#    - CanESM2
+#    -
+#    - HadGEM2-ES
+#    - MIROC5
 
 # Topography
 topobase: 'SRTM_SierraConservancy_3310_.tif'

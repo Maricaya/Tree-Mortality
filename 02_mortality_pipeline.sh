@@ -29,6 +29,7 @@ echo "topo_subdir: $config_topo_subdir"
 
 # Directories
 mortdir="${config_root_dir}/${config_mortality_subdir}"
+mort_generated_dir="${mortdir}/generated"
 bcmdir="${config_root_dir}/${config_bcm_subdir}"
 topodir="${config_root_dir}/${config_topo_subdir}"
 echo "Mortality directory: $mortdir"
@@ -39,7 +40,7 @@ echo "Topo directory: $topodir"
 mortality() {
     echo "Starting mortality function..."
 
-    local output_directory="${mortdir}/tree_mortality.zarr"
+    local output_directory="${mort_generated_dir}/tree_mortality.zarr"
     local config="${config_mort_config}"
 
     if [ ! -d "$mortdir" ]; then
@@ -66,8 +67,8 @@ mortality() {
 mortality_folds() {
     echo "Starting mortality_folds function..."
 
-    local input_file="${mortdir}/tree_mortality.zarr"
-    local output_directory="${mortdir}/tree_mortality_folds.zarr"
+    local input_file="${mort_generated_dir}/tree_mortality.zarr"
+    local output_directory="${mort_generated_dir}/tree_mortality_folds.zarr"
     local config="${config_mort_fold_config}"
 
     if [ ! -d "$input_file" ]; then
@@ -94,8 +95,8 @@ mortality_folds() {
 mortality_training() {
     echo "Starting mortality_training function..."
 
-    local input_files=("${mortdir}/tree_mortality_folds.zarr" "${bcmdir}/BCMv8_indexes.zarr" "${topodir}/topo_indexes.zarr")
-    local output_directory="${mortdir}/tree_mortality_training.zarr"
+    local input_files=("${mort_generated_dir}/tree_mortality_folds.zarr" "${bcmdir}/BCMv8_indexes.zarr" "${topodir}/topo_indexes.zarr")
+    local output_directory="${mort_generated_dir}/tree_mortality_training.zarr"
     local config="${config_mort_trainset_config}"
 
     for file in "${input_files[@]}"; do
@@ -124,8 +125,8 @@ mortality_training() {
 nonzero_mortality() {
     echo "Starting nonzero_mortality function..."
 
-    local input_file="${mortdir}/tree_mortality_training.zarr"
-    local output_directory="${mortdir}/tree_mortality_training_nonzero.zarr"
+    local input_file="${mort_generated_dir}/tree_mortality_training.zarr"
+    local output_directory="${mort_generated_dir}/tree_mortality_training_nonzero.zarr"
     local config="${config_mort_trainset_config}"
 
     if [ ! -d "$input_file" ]; then

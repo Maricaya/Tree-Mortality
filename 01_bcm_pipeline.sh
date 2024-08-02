@@ -109,6 +109,7 @@ aggregate_bcm() {
 }
 
 # Step 4: Append BCM Indexes
+# todo 不要
 bcm_indexes() {
     echo "Starting bcm_indexes function..."
 
