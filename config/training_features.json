@@ -1,32 +1,37 @@
 {
   "features": {
-    "PR": {
-      "cumulative": 6,
-      "back": 6
+    "climate": {
+      "PR": {
+        "cumulative": 6,
+        "back": 0
+      },
+      "PRET": {
+        "cumulative": 6,
+        "back": 0
+      },
+      "SPI": {
+        "cumulative": 6,
+        "back": 0
+      },
+      "SPEI": {
+        "cumulative": 6,
+        "back": 0
+      }
     },
-    "PRET": {
-      "cumulative": 6,
-      "back": 6
-    },
-    "SPI": {
-      "cumulative": 6,
-      "back": 6
-    },
-    "SPEI": {
-      "cumulative": 6,
-      "back": 6
-    }
+    "topography": [
+      "elevation",
+      "adjsd",
+      "northness",
+      "slope",
+      "rie",
+      "sapa",
+      "sdmv",
+      "tpi",
+      "vrm"
+    ]
   },
   "target": "tpa",
   "years": [
-    2012,
-    2013,
-    2014,
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
     2021
   ],
   "chunks": {

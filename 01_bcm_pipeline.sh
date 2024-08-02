@@ -30,7 +30,7 @@ echo "bcm_ind_config: $config_bcm_ind_config"
 bcmdir="${config_root_dir}/${config_bcm_subdir}"
 echo "BCM directory: $bcmdir"
 
-bcm_variables=(aet cwd pck pet ppt rch run str tmn tmx)
+bcm_variables=(pet ppt)
 
 # Step 1: Convert BCM
 convert_bcm() {

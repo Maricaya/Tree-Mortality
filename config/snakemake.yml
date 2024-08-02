@@ -19,20 +19,20 @@ bcm_proj_ind_config: 'config/bcm_v8_proj_indices.json'
 mort_config: 'config/tree_mortality.json'
 mort_fold_config: 'config/tree_mortality_folds.json'
 mort_rand_fold_config: 'config/tree_mortality_rand_folds.json'
-mort_trainset_config: 'config/training_features.yml'
+mort_trainset_config: 'config/training_features.json'
 topo_config: 'config/topo_variables.json'
 
 bcm_variables:
-    - aet
-    - cwd
-    - pck
+#    - aet
+#    - cwd
+#    - pck
     - pet
     - ppt
-    - rch
-    - run
-    - str
-    - tmn
-    - tmx
+#    - rch
+#    - run
+#    - str
+#    - tmn
+#    - tmx
 
 # Climate Projections
 

@@ -120,5 +120,33 @@ mortality_training() {
     fi
 }
 
+# Step 4: Filter Non-Zero Mortality Data
+nonzero_mortality() {
+    echo "Starting nonzero_mortality function..."
+
+    local input_file="${mortdir}/tree_mortality_training.zarr"
+    local output_directory="${mortdir}/tree_mortality_training_nonzero.zarr"
+    local config="${config_mort_trainset_config}"
+
+    if [ ! -d "$input_file" ]; then
+        echo "Error: Training dataset $input_file does not exist."
+        return 1
+    fi
+
+    echo "Output directory: $output_directory"
+    echo "Using config file: $config"
+
+    # Execute the filter_zero_values.py script
+    echo "Executing python script to filter zero values..."
+    python src/filter_zero_values.py "$input_file" "$config" "$output_directory"
+
+    if [ $? -eq 0 ]; then
+        echo "Non-zero mortality data filtering completed successfully."
+    else
+        echo "Non-zero mortality data filtering failed."
+        return 1
+    fi
+}
+
 # Execute all steps
-mortality && mortality_folds && mortality_training
+mortality && mortality_folds && mortality_training && nonzero_mortality
