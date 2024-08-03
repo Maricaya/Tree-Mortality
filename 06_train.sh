@@ -1,31 +1,8 @@
 #!/bin/bash
 
-# Configuration
-configfile="config/snakemake.yml"
-
-# Function to parse YAML (simplified)
-parse_yaml() {
-    local prefix=$2
-    local s='[[:space:]]*'
-    local w='[a-zA-Z0-9_]*'
-    local fs=$(echo @|tr @ '\034')
-    sed -ne "s|^\($s\):|\1|" \
-         -e "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|$prefix\2=\3|p" \
-         -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|$prefix\2=\3|p" $1
-}
-
-# Load configurations from YAML
-eval $(parse_yaml $configfile "config_")
-
-# Print loaded configuration
-echo "Loaded configuration from $configfile:"
-echo "root_dir: $config_root_dir"
-echo "results_subdir: $config_results_subdir"
-echo "mortality_subdir: $config_mortality_subdir"
+source common.sh
 
 # Directories
-mortdir="${config_root_dir}/${config_mortality_subdir}"
-resultsdir="${config_root_dir}/${config_results_subdir}"
 echo "Mortality directory: $mortdir"
 echo "Results directory: $resultsdir"
 
@@ -49,6 +26,8 @@ train_model() {
 
     echo "Input file: $input_file"
     echo "Output file: $output_file"
+
+#    delete_directory "${output_directory}"
 
     # Execute the train_rf_model_ray.py script
     echo "Executing python script to train model..."

@@ -1,6 +1,10 @@
 {
   "projection": "EPSG:3310",
   "variables": {
+     "aet": {
+      "long_name": "Actual Evapotranspiration",
+      "units": "mm"
+    },
     "pet": {
       "long_name": "Potential Evapotranspiration",
       "units": "mm"

@@ -31,7 +31,6 @@ merge_bcm() {
 
 # Main execution
 main() {
-    print_config
     merge_bcm
 }
 

@@ -3,13 +3,24 @@
     "easting": 512,
     "northing": 512
   },
-  "variables": [
+   "variables": [
     {
-      "name": "elevation",
+      "name": "eastness_9x9",
+      "new_name": "eastness",
       "attrs" :{
-        "long_name": "Elevation",
-        "units": "m"
+        "long_name": "Eastness",
+        "units": "1"
+      }
+    },
+    {
+      "name": "northness_9x9",
+      "new_name": "northness",
+      "attrs" :{
+        "long_name": "Northness",
+        "units": "1"
       }
     }
   ]
 }
+
+

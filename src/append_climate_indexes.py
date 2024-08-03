@@ -31,10 +31,7 @@ def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
 
     return norm.ppf(cdf)
 
-
-def compute_si_ppf(focal_period, reference_period=None,
-                   reference_dist=gamma, prob_zero: bool = False, fit_kwargs: dict = None,
-                   time_dim: str = 'year'):
+def compute_si_ppf(focal_period, reference_period=None, reference_dist=gamma, prob_zero: bool = False, fit_kwargs: dict = None, time_dim: str = 'year'):
     if reference_period is None:
         reference_period = focal_period
 
@@ -54,10 +51,7 @@ def compute_si_ppf(focal_period, reference_period=None,
             'prob_zero': prob_zero,
             'fit_kwargs': fit_kwargs,
         },
-    ).rename({new_time_dim: time_dim}).assign_attrs(
-        {'units': 'standard deviations'}
-    )
-
+    ).rename({new_time_dim: time_dim}).assign_attrs({'units': 'standard deviations'})
 
 def spi(focal_period, reference_period=None, time_dim='year'):
     return compute_si_ppf(
@@ -68,7 +62,6 @@ def spi(focal_period, reference_period=None, time_dim='year'):
         time_dim=time_dim
     ).transpose(*focal_period.dims)
 
-
 def spei(focal_period, reference_period=None, time_dim='year'):
     return compute_si_ppf(
         focal_period, reference_period,
@@ -77,19 +70,35 @@ def spei(focal_period, reference_period=None, time_dim='year'):
         time_dim=time_dim
     ).transpose(*focal_period.dims)
 
-
 def pr(ds, window, precip='ppt'):
-    return ds[precip].rolling(window).sum().assign_attrs(
-        {'units': ds[precip].units}
-    )
+    print(f"Dataset dimensions: {ds.dims}")
+    print(f"Dataset variables: {list(ds.data_vars)}")
+    print(f"Selected variable shape: {ds[precip].shape}")
+    print(f"Rolling window size: {window}")
 
+    time_dim, window_size = next(iter(window.items()))
+    time_dim_size = ds[precip].sizes[time_dim]
+
+    if time_dim_size < window_size:
+        raise ValueError(f"Window size {window_size} is too large for the data size {time_dim_size}")
+
+    return ds[precip].rolling({time_dim: window_size}).sum().assign_attrs({'units': ds[precip].units})
 
 def pret(ds, window, precip='ppt', et='pet'):
     wb = ds[precip] - ds[et]
-    return wb.rolling(window).sum().assign_attrs(
-        {'units': ds[precip].units}
-    )
 
+    print(f"Dataset dimensions: {ds.dims}")
+    print(f"Dataset variables: {list(ds.data_vars)}")
+    print(f"Selected variable shape (water balance): {wb.shape}")
+    print(f"Rolling window size: {window}")
+
+    time_dim, window_size = next(iter(window.items()))
+    time_dim_size = wb.sizes[time_dim]
+
+    if time_dim_size < window_size:
+        raise ValueError(f"Window size {window_size} is too large for the data size {time_dim_size}")
+
+    return wb.rolling({time_dim: window_size}).sum().assign_attrs({'units': ds[precip].units})
 
 def process_index(idx, ds, span, focal_period, reference_period, time_dim, computed_indices):
     name = idx['name']
@@ -97,22 +106,31 @@ def process_index(idx, ds, span, focal_period, reference_period, time_dim, compu
     params.pop('chunk', None)
     window = {time_dim: span}
 
-    if name == "PR":
-        da = pr(ds, window, **params)
-    elif name == "PRET":
-        da = pret(ds, window, **params)
-    elif name == "SPI":
-        pr_in = computed_indices['PR']
-        foc = pr_in.sel({time_dim: slice(*focal_period)})
-        ref = pr_in.sel({time_dim: slice(*reference_period)})
-        da = spi(foc, ref, time_dim=time_dim)
-    elif name == "SPEI":
-        wb_in = computed_indices['PRET']
-        foc = wb_in.sel({time_dim: slice(*focal_period)})
-        ref = wb_in.sel({time_dim: slice(*reference_period)})
-        da = spei(foc, ref, time_dim=time_dim)
-    else:
-        raise ValueError(f'Unknown index "{name}"')
+    print(f"Processing index: {name}")
+    try:
+        if name == "PR":
+            da = pr(ds, window, **params)
+        elif name == "PRET":
+            da = pret(ds, window, **params)
+        elif name == "SPI":
+            pr_in = computed_indices.get('PR')
+            if pr_in is None:
+                raise ValueError('PR index not computed for the current span.')
+            foc = pr_in.sel({time_dim: slice(*focal_period)})
+            ref = pr_in.sel({time_dim: slice(*reference_period)})
+            da = spi(foc, ref, time_dim=time_dim)
+        elif name == "SPEI":
+            wb_in = computed_indices.get('PRET')
+            if wb_in is None:
+                raise ValueError('PRET index not computed for the current span.')
+            foc = wb_in.sel({time_dim: slice(*focal_period)})
+            ref = wb_in.sel({time_dim: slice(*reference_period)})
+            da = spei(foc, ref, time_dim=time_dim)
+        else:
+            raise ValueError(f'Unknown index "{name}"')
+    except ValueError as e:
+        print(f"Skipping index {name} due to error: {e}")
+        return None, None
 
     sub = da.sel({time_dim: slice(*focal_period)})
     sub = sub.rename(idx['name_format'].format(span=span))
@@ -121,20 +139,18 @@ def process_index(idx, ds, span, focal_period, reference_period, time_dim, compu
     })
     return name, sub
 
-
 def make_indices(ds, span, focal_period, reference_period, indices, time_dim='year'):
     computed_indices = {}
     ret_indices = []
 
-    # Compute PR and PRET first
     for idx in indices:
         name = idx['name']
         if name in ["PR", "PRET"]:
             name, result = process_index(idx, ds, span, focal_period, reference_period, time_dim, computed_indices)
-            computed_indices[name] = result
-            ret_indices.append(result)
+            if result is not None:
+                computed_indices[name] = result
+                ret_indices.append(result)
 
-    # Compute SPI and SPEI using the already computed PR and PRET
     with ProcessPoolExecutor() as executor:
         futures = [
             executor.submit(process_index, idx, ds, span, focal_period, reference_period, time_dim, computed_indices)
@@ -142,9 +158,9 @@ def make_indices(ds, span, focal_period, reference_period, indices, time_dim='ye
         ]
         for future in tqdm(futures, desc=f'Processing Span {span} Indices'):
             name, result = future.result()
-            ret_indices.append(result)
+            if result is not None:
+                ret_indices.append(result)
     return ret_indices
-
 
 @click.command()
 @click.argument('inputfile', type=click.Path(path_type=Path, exists=True))
@@ -165,6 +181,13 @@ def main(inputfile, configfile, outputfile, reference):
 
     ds = xr.open_zarr(inputfile)
     ds = ds.chunk(chunks)
+
+    for dim, size in ds.sizes.items():
+        if size == 0:
+            raise ValueError(f"The dimension {dim} in the input dataset has size 0. Cannot proceed with empty dimensions.")
+    print("Dataset loaded successfully. Dimensions and sizes:")
+    print(ds.sizes)
+    print(ds)
 
     if reference is not None:
         dsref = xr.open_zarr(reference)
@@ -210,7 +233,6 @@ def main(inputfile, configfile, outputfile, reference):
         outputfile, mode='w', consolidated=True
     )
     print('Done')
-
 
 if __name__ == '__main__':
     main()

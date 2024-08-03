@@ -30,7 +30,6 @@ convert_bcm() {
 
 # Main execution
 main() {
-    print_config
     convert_bcm
 }
 

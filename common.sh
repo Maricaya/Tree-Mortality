@@ -3,7 +3,7 @@
 # Configuration
 CONFIGFILE="config/snakemake.yml"
 # todo auto
-SCIUNIT_PROJECT_NAME="tree-debug"
+SCIUNIT_PROJECT_NAME="tree-mortality"
 
 # Function to parse YAML (simplified)
 parse_yaml() {
@@ -57,7 +57,8 @@ print_config() {
 mortdir="${config_root_dir}/${config_mortality_subdir}"
 mort_generated_dir="${mortdir}/generated"
 bcmdir="${config_root_dir}/${config_bcm_subdir}"
-bcm_variables=(pet ppt)
+bcm_variables=(aet cwd pck pet ppt rch run str tmn tmx)  # Add your variables here
+#bcm_variables=(pet ppt aet)
 topodir="${config_root_dir}/${config_topo_subdir}"
 projdir="${config_root_dir}/${config_projections_subdir}"
 resultsdir="${config_root_dir}/${config_results_subdir}"

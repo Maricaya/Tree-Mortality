@@ -23,7 +23,7 @@ mort_trainset_config: 'config/training_features.json'
 topo_config: 'config/topo_variables.json'
 
 bcm_variables:
-#    - aet
+    - aet
 #    - cwd
 #    - pck
     - pet

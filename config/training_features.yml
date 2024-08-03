@@ -14,14 +14,14 @@ features:
       back: 0
   topography:
     - elevation
-#    - adjsd
-#    - northness
-#    - slope
-#    - rie
-#    - sapa
-#    - sdmv
-#    - tpi
-#    - vrm
+    - adjsd
+    - northness
+    - slope
+    - rie
+    - sapa
+    - sdmv
+    - tpi
+    - vrm
 
 target: tpa
 

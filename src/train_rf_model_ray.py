@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import click
 import ray
 import numpy as np
@@ -9,6 +10,7 @@ from itertools import product
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error as mse, r2_score
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,12 +38,10 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     idx = ((ds['year'] == training_year) & (ds['fold'] != held_out_fold)).compute()
     ds_trn = ds.where(idx, drop=True).compute()
 
-    ytrn = ds_trn['tpa'].as_numpy()
-    features = ds_trn.drop_vars(
-        ('id', 'fold', 'easting', 'northing', 'year', 'tpa')
-    )
+    ytrn = ds_trn['tpa'].values
+    features = ds_trn.drop_vars(('id', 'fold', 'easting', 'northing', 'year', 'tpa'))
     feature_names = list(features.keys())
-    Xtrn = features.to_array().T
+    Xtrn = features.to_array().values.T
     Xtrn, ytrn = filter_inf(Xtrn, ytrn)
 
     rf = RandomForestRegressor(max_depth=5)
@@ -52,12 +52,10 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     idx = (ds['fold'] == held_out_fold).compute()
     ds_tst = ds.where(idx, drop=True).compute()
 
-    ids_tst = ds_tst['id'].as_numpy()
-    years_tst = ds_tst['year'].as_numpy()
-    ytst = ds_tst['tpa'].as_numpy()
-    Xtst = ds_tst.drop_vars(
-        ('id', 'fold', 'easting', 'northing', 'year', 'tpa')
-    ).to_array().T
+    ids_tst = ds_tst['id'].values
+    years_tst = ds_tst['year'].values
+    ytst = ds_tst['tpa'].values
+    Xtst = ds_tst.drop_vars(('id', 'fold', 'easting', 'northing', 'year', 'tpa')).to_array().values.T
     Xtst, ytst = filter_inf(Xtst, ytst)
 
     ypred = rf.predict(Xtst)
@@ -84,21 +82,16 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     }
 
 @click.command()
-@click.argument('trainingfile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('resultfile', type=click.Path(
-    path_type=Path, exists=False
-))
+@click.argument('trainingfile', type=click.Path(path_type=Path, exists=True))
+@click.argument('resultfile', type=click.Path(path_type=Path, exists=False))
 def main(trainingfile, resultfile):
-    import os
     os.environ["RAY_DISABLE_DASHBOARD"] = "1"  # Disable the Ray dashboard
-    ray.init()
+    ray.init(ignore_reinit_error=True)
 
     ds = xr.open_zarr(trainingfile)
-    years = np.unique(ds['year']).astype(int)
-    folds = np.unique(ds['fold']).astype(int)
-    ids = np.unique(ds['id']).astype(int)
+    years = np.unique(ds['year'].values).astype(int)
+    folds = np.unique(ds['fold'].values).astype(int)
+    ids = np.unique(ds['id'].values).astype(int)
 
     tasks = []
     for year, fold in product(years, folds):
@@ -122,9 +115,7 @@ def main(trainingfile, resultfile):
             targets[tyear_idx, y, id_idx] = t
 
         fold_idx = np.searchsorted(folds, r['fold'])
-        importances[tyear_idx, fold_idx, :] = np.array(
-            [r['importances'][n] for n in feature_names]
-        )
+        importances[tyear_idx, fold_idx, :] = np.array([r['importances'][n] for n in feature_names])
 
     out = {
         'ids': ids,

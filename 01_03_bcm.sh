@@ -30,7 +30,6 @@ aggregate_bcm() {
 
 # Main execution
 main() {
-    print_config
     aggregate_bcm
 }
 

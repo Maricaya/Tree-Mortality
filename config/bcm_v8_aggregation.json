@@ -10,6 +10,9 @@
     "year": -1
   },
   "aggregation": {
+    "aet": "sum",
+    "cwd": "sum",
+    "pck": "sum",
     "pet": "sum",
     "ppt": "sum"
   }

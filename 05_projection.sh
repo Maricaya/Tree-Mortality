@@ -1,34 +1,8 @@
 #!/bin/bash
 
-# Configuration
-configfile="config/snakemake.yml"
-
-# Function to parse YAML (simplified)
-parse_yaml() {
-    local prefix=$2
-    local s='[[:space:]]*'
-    local w='[a-zA-Z0-9_]*'
-    local fs=$(echo @|tr @ '\034')
-    sed -ne "s|^\($s\):|\1|" \
-         -e "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|$prefix\2=\3|p" \
-         -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|$prefix\2=\3|p" $1
-}
-
-# Load configurations from YAML
-eval $(parse_yaml $configfile "config_")
-
-# Print loaded configuration
-echo "Loaded configuration from $configfile:"
-echo "root_dir: $config_root_dir"
-echo "projdir: $config_projections_subdir"
-echo "bcm_subdir: $config_bcm_subdir"
-echo "bcm_config: $config_bcm_config"
-echo "bcm_ind_config: $config_bcm_ind_config"
-echo "agg_config: $config_agg_config"
+source common.sh
 
 # Directories
-projdir="${config_root_dir}/${config_projections_subdir}"
-bcmdir="${config_root_dir}/${config_bcm_subdir}"
 echo "Projections directory: $projdir"
 echo "BCM directory: $bcmdir"
 
@@ -81,6 +55,8 @@ merge_projection() {
     echo "Output directory: $output_directory"
     echo "Using config file: $config"
 
+    delete_directory "${output_directory}"
+
     # Execute the merge_projections.py script
     echo "Executing python script to merge projections..."
     python src/merge_bcm.py "${input_files[@]}" "$config" "$output_directory" || handle_error "Merging of projections failed."
@@ -106,6 +82,7 @@ aggregate_projection() {
     echo "Output directory: $output_directory"
     echo "Using config file: $config"
 
+    delete_directory "${output_directory}"
     # Execute the aggregate_bcm_v8.py script
     echo "Executing python script to aggregate projections..."
     python src/aggregate_bcm_v8.py "$input_file" "$config" "$output_directory" || handle_error "Aggregation of projections failed."
@@ -131,6 +108,8 @@ projection_indexes() {
     echo "Output directory: $output_directory"
     echo "Using config file: $config"
 
+    delete_directory "${output_directory}"
+
     # Execute the append_climate_indexes.py script
     echo "Executing python script to append climate indexes..."
     python src/append_climate_indexes.py "$input_file" "$config" "$output_directory" -r "$ref" || handle_error "Appending of projection indexes failed."
@@ -139,18 +118,12 @@ projection_indexes() {
 }
 
 # Models and scenarios
-models=("GFDL-CM3")  # Add your models here
-scenarios=("RCP45")  # Add your scenarios here
-bcm_variables=("pet" "ppt")  # Add your variables here
-
+model="GFDL-CM3"  # Add your models here
+scenario="RCP45"  # Add your scenarios here
 # Execute steps for each combination of model, scenario, and variable
-for model in "${models[@]}"; do
-    for scenario in "${scenarios[@]}"; do
-        for var in "${bcm_variables[@]}"; do
-            convert_projection "$model" "$scenario" "$var"
-        done
-        merge_projection "$model" "$scenario"
-        aggregate_projection "$model" "$scenario"
-        projection_indexes "$model" "$scenario"
-    done
+for var in "${bcm_variables[@]}"; do
+    convert_projection "$model" "$scenario" "$var"
 done
+merge_projection "$model" "$scenario"
+aggregate_projection "$model" "$scenario"
+
