@@ -8,6 +8,7 @@ from tqdm import tqdm
 from scipy.stats import norm, gamma
 from concurrent.futures import ProcessPoolExecutor
 
+
 def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
     nan_values = np.isnan(ref)
     if np.all(nan_values):
@@ -30,10 +31,10 @@ def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
 
     return norm.ppf(cdf)
 
-def compute_si_ppf(focal_period, reference_period=None,
-                   reference_dist=gamma, prob_zero=False, fit_kwargs=None,
-                   time_dim='year'):
 
+def compute_si_ppf(focal_period, reference_period=None,
+                   reference_dist=gamma, prob_zero: bool = False, fit_kwargs: dict = None,
+                   time_dim: str = 'year'):
     if reference_period is None:
         reference_period = focal_period
 
@@ -41,8 +42,8 @@ def compute_si_ppf(focal_period, reference_period=None,
 
     return xr.apply_ufunc(
         _compute_si,
-        focal_period.rename({time_dim: new_time_dim}).load(),  # Load data into memory
-        reference_period.load(),  # Load data into memory
+        focal_period.rename({time_dim: new_time_dim}).load(),
+        reference_period.load(),
         input_core_dims=[[new_time_dim], [time_dim]],
         exclude_dims=set([time_dim]),
         output_core_dims=[[new_time_dim]],
@@ -57,6 +58,7 @@ def compute_si_ppf(focal_period, reference_period=None,
         {'units': 'standard deviations'}
     )
 
+
 def spi(focal_period, reference_period=None, time_dim='year'):
     return compute_si_ppf(
         focal_period, reference_period,
@@ -66,6 +68,7 @@ def spi(focal_period, reference_period=None, time_dim='year'):
         time_dim=time_dim
     ).transpose(*focal_period.dims)
 
+
 def spei(focal_period, reference_period=None, time_dim='year'):
     return compute_si_ppf(
         focal_period, reference_period,
@@ -74,10 +77,12 @@ def spei(focal_period, reference_period=None, time_dim='year'):
         time_dim=time_dim
     ).transpose(*focal_period.dims)
 
+
 def pr(ds, window, precip='ppt'):
     return ds[precip].rolling(window).sum().assign_attrs(
         {'units': ds[precip].units}
     )
+
 
 def pret(ds, window, precip='ppt', et='pet'):
     wb = ds[precip] - ds[et]
@@ -85,57 +90,68 @@ def pret(ds, window, precip='ppt', et='pet'):
         {'units': ds[precip].units}
     )
 
+
+def process_index(idx, ds, span, focal_period, reference_period, time_dim, computed_indices):
+    name = idx['name']
+    params = idx.get('params', {}).copy()
+    params.pop('chunk', None)
+    window = {time_dim: span}
+
+    if name == "PR":
+        da = pr(ds, window, **params)
+    elif name == "PRET":
+        da = pret(ds, window, **params)
+    elif name == "SPI":
+        pr_in = computed_indices['PR']
+        foc = pr_in.sel({time_dim: slice(*focal_period)})
+        ref = pr_in.sel({time_dim: slice(*reference_period)})
+        da = spi(foc, ref, time_dim=time_dim)
+    elif name == "SPEI":
+        wb_in = computed_indices['PRET']
+        foc = wb_in.sel({time_dim: slice(*focal_period)})
+        ref = wb_in.sel({time_dim: slice(*reference_period)})
+        da = spei(foc, ref, time_dim=time_dim)
+    else:
+        raise ValueError(f'Unknown index "{name}"')
+
+    sub = da.sel({time_dim: slice(*focal_period)})
+    sub = sub.rename(idx['name_format'].format(span=span))
+    sub = sub.assign_attrs({
+        'long_name': idx['long_name_format'].format(span=span)
+    })
+    return name, sub
+
+
 def make_indices(ds, span, focal_period, reference_period, indices, time_dim='year'):
-    inputs = {}
+    computed_indices = {}
     ret_indices = []
 
+    # Compute PR and PRET first
     for idx in indices:
         name = idx['name']
-        params = idx.get('params', {})
-        window = {time_dim: span}
-        match name:
-            case "PR":
-                da = pr(ds, window, **params).load()  # Load data into memory
-            case "PRET":
-                da = pret(ds, window, **params).load()  # Load data into memory
-            case "SPI":
-                pr_in = inputs['PR']
-                foc = pr_in.sel({time_dim: slice(*focal_period)}).load()  # Load data into memory
-                ref = pr_in.sel({time_dim: slice(*reference_period)}).load()  # Load data into memory
-                da = spi(foc, ref, time_dim=time_dim, **params)
-            case "SPEI":
-                wb_in = inputs['PRET']
-                foc = wb_in.sel({time_dim: slice(*focal_period)}).load()  # Load data into memory
-                ref = wb_in.sel({time_dim: slice(*reference_period)}).load()  # Load data into memory
-                da = spei(foc, ref, time_dim=time_dim, **params)
-            case _:
-                raise ValueError(f'Unknown index "{name}"')
+        if name in ["PR", "PRET"]:
+            name, result = process_index(idx, ds, span, focal_period, reference_period, time_dim, computed_indices)
+            computed_indices[name] = result
+            ret_indices.append(result)
 
-        inputs[name] = da
-        sub = da.sel({time_dim: slice(*focal_period)})
-        sub = sub.rename(idx['name_format'].format(span=span))
-        sub = sub.assign_attrs({
-            'long_name': idx['long_name_format'].format(span=span)
-        })
-        ret_indices.append(sub)
-
+    # Compute SPI and SPEI using the already computed PR and PRET
+    with ProcessPoolExecutor() as executor:
+        futures = [
+            executor.submit(process_index, idx, ds, span, focal_period, reference_period, time_dim, computed_indices)
+            for idx in indices if idx['name'] in ["SPI", "SPEI"]
+        ]
+        for future in tqdm(futures, desc=f'Processing Span {span} Indices'):
+            name, result = future.result()
+            ret_indices.append(result)
     return ret_indices
 
-@click.command()
-@click.argument('inputfile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('configfile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('outputfile', type=click.Path(
-    path_type=Path, exists=False
-))
-@click.option('-r', '--reference', type=click.Path(
-    path_type=Path, exists=False
-), default=None)
-def main(inputfile, configfile, outputfile, reference):
 
+@click.command()
+@click.argument('inputfile', type=click.Path(path_type=Path, exists=True))
+@click.argument('configfile', type=click.Path(path_type=Path, exists=True))
+@click.argument('outputfile', type=click.Path(path_type=Path, exists=False))
+@click.option('-r', '--reference', type=click.Path(path_type=Path, exists=False), default=None)
+def main(inputfile, configfile, outputfile, reference):
     with open(configfile, 'r') as f:
         config = json.load(f)
 
@@ -148,9 +164,21 @@ def main(inputfile, configfile, outputfile, reference):
     out_chunks = config['output_chunks']
 
     ds = xr.open_zarr(inputfile)
+    ds = ds.chunk(chunks)
 
     if reference is not None:
         dsref = xr.open_zarr(reference)
+        dsref = dsref.chunk(chunks)
+
+        ds = ds.assign_coords(
+            easting=np.round(ds.easting.values, 4),
+            northing=np.round(ds.northing.values, 4),
+        )
+        dsref = dsref.assign_coords(
+            easting=np.round(dsref.easting.values, 4),
+            northing=np.round(dsref.northing.values, 4),
+        )
+
         ds = xr.concat(
             [
                 dsref.sel({time_dim: slice(*reference_period)}),
@@ -163,13 +191,14 @@ def main(inputfile, configfile, outputfile, reference):
         )
         ds.rio.write_crs(dsref.rio.crs, inplace=True)
 
-    orig = ds.sel({time_dim: slice(*focal_period)}).load()  # Load data into memory
+    orig = ds.sel({time_dim: slice(*focal_period)})
 
     all_indices = [orig]
-    with ProcessPoolExecutor() as executor:
-        futures = [executor.submit(make_indices, ds, span, focal_period, reference_period, indices, time_dim) for span in spans]
-        for future in tqdm(futures, desc='Computing Span Indices'):
-            all_indices += future.result()
+    for span in spans:
+        all_indices += make_indices(
+            ds, span, focal_period, reference_period, indices,
+            time_dim=time_dim
+        )
 
     indices_ds = xr.merge(
         all_indices, combine_attrs='drop_conflicts'
@@ -177,8 +206,11 @@ def main(inputfile, configfile, outputfile, reference):
     indices_ds = indices_ds.chunk(out_chunks)
     print(indices_ds)
 
-    indices_ds.to_zarr(outputfile, mode='w', consolidated=True)
+    indices_ds.to_zarr(
+        outputfile, mode='w', consolidated=True
+    )
     print('Done')
+
 
 if __name__ == '__main__':
     main()

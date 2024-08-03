@@ -4,7 +4,7 @@ source common.sh
 
 # Function to append BCM indexes
 bcm_indexes() {
-    printf "Starting bcm_indexes function...\n"
+    echo "Starting bcm_indexes function..."
 
     local input_file="${bcmdir}/BCMv8_annual.zarr"
     local output_directory="${bcmdir}/BCMv8_indexes.zarr"
@@ -13,25 +13,19 @@ bcm_indexes() {
     delete_directory "${output_directory}"
 
     if [ -d "$input_file" ]; then
-        printf "Appending BCM indexes\n"
+        echo "Appending BCM indexes"
         python src/append_climate_indexes.py "$input_file" "$config" "$output_directory"
 
         if [ $? -eq 0 ]; then
-            printf "BCM indexes computation completed successfully.\n"
+            echo "BCM indexes computation completed successfully."
         else
-            printf "BCM indexes computation failed.\n" >&2
+            echo "BCM indexes computation failed."
             return 1
         fi
     else
-        printf "Error: Annual dataset %s does not exist.\n" "$input_file" >&2
+        echo "Error: Annual dataset $input_file does not exist."
         return 1
     fi
 }
 
-# Main execution
-main() {
-    print_config
-    bcm_indexes
-}
-
-main "$@"
+bcm_indexes

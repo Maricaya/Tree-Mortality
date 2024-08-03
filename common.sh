@@ -47,6 +47,10 @@ print_config() {
     printf "topo_subdir: %s\n" "$config_topo_subdir"
     echo "topobase: $config_topobase"
     echo "topo_config: $config_topo_config"
+    echo "projdir: $config_projections_subdir"
+    echo "bcm_config: $config_bcm_config"
+    echo "agg_config: $config_agg_config"
+    echo "results_subdir: $config_results_subdir"
 }
 
 # Directories
@@ -55,3 +59,5 @@ mort_generated_dir="${mortdir}/generated"
 bcmdir="${config_root_dir}/${config_bcm_subdir}"
 bcm_variables=(pet ppt)
 topodir="${config_root_dir}/${config_topo_subdir}"
+projdir="${config_root_dir}/${config_projections_subdir}"
+resultsdir="${config_root_dir}/${config_results_subdir}"
