@@ -5,28 +5,36 @@ import numpy as np
 import xarray as xr
 from tqdm import tqdm
 from pathlib import Path
-from collections import defaultdict
 from itertools import product
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error as mse, r2_score
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def filter_inf(X, y=None, fill=1e2):
     if np.any(np.isnan(X)):
-        raise ValueError('NaN entries present but not handled')
+        raise ValueError('NaN entries present in feature matrix X')
     Xnew = np.nan_to_num(X, neginf=-fill, posinf=fill)
     if y is None:
         return Xnew
-    else:
-        return Xnew, y
+    if np.any(np.isnan(y)):
+        raise ValueError('NaN entries present in target vector y')
+    return Xnew, y
 
+def handle_nan(ds):
+    # Handle NaN values by filling or removing them
+    ds = ds.fillna(0)  # Example: fill NaNs with 0, you may choose a different strategy
+    return ds
 
 @ray.remote
 def eval_fold(trainingfile, held_out_fold, training_year):
     ds = xr.open_zarr(trainingfile)
+    ds = handle_nan(ds)  # Ensure NaN values are handled
 
     idx = ((ds['year'] == training_year) & (ds['fold'] != held_out_fold)).compute()
-    ds_trn= ds.where(idx, drop=True).compute()
+    ds_trn = ds.where(idx, drop=True).compute()
 
     ytrn = ds_trn['tpa'].as_numpy()
     features = ds_trn.drop_vars(
@@ -75,8 +83,6 @@ def eval_fold(trainingfile, held_out_fold, training_year):
         'importances': importances,
     }
 
-
-
 @click.command()
 @click.argument('trainingfile', type=click.Path(
     path_type=Path, exists=True
@@ -85,7 +91,8 @@ def eval_fold(trainingfile, held_out_fold, training_year):
     path_type=Path, exists=False
 ))
 def main(trainingfile, resultfile):
-
+    import os
+    os.environ["RAY_DISABLE_DASHBOARD"] = "1"  # Disable the Ray dashboard
     ray.init()
 
     ds = xr.open_zarr(trainingfile)
@@ -130,7 +137,6 @@ def main(trainingfile, resultfile):
     }
 
     np.savez_compressed(resultfile, **out)
-
 
 if __name__ == '__main__':
     main()

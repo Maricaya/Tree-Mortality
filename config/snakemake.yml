@@ -1,7 +1,7 @@
 
 # Directory Structure
 
-root_dir: '/home/ubuntu/Tree-Mortality/data'
+root_dir: '/Tree-Mortality/data'
 projections_subdir: 'projections/BCM'
 mortality_subdir: 'tree_mortality'
 bcm_subdir: 'bcm'

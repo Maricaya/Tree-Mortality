@@ -8,7 +8,6 @@ from tqdm import tqdm
 from scipy.stats import norm, gamma
 from concurrent.futures import ProcessPoolExecutor
 
-
 def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
     nan_values = np.isnan(ref)
     if np.all(nan_values):
@@ -31,10 +30,9 @@ def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
 
     return norm.ppf(cdf)
 
-
 def compute_si_ppf(focal_period, reference_period=None,
                    reference_dist=gamma, prob_zero=False, fit_kwargs=None,
-                   time_dim='year', chunk=None):
+                   time_dim='year'):
 
     if reference_period is None:
         reference_period = focal_period
@@ -43,8 +41,8 @@ def compute_si_ppf(focal_period, reference_period=None,
 
     return xr.apply_ufunc(
         _compute_si,
-        focal_period.rename({time_dim: new_time_dim}),
-        reference_period,
+        focal_period.rename({time_dim: new_time_dim}).load(),  # Load data into memory
+        reference_period.load(),  # Load data into memory
         input_core_dims=[[new_time_dim], [time_dim]],
         exclude_dims=set([time_dim]),
         output_core_dims=[[new_time_dim]],
@@ -59,40 +57,33 @@ def compute_si_ppf(focal_period, reference_period=None,
         {'units': 'standard deviations'}
     )
 
-
-def spi(focal_period, reference_period=None, time_dim='year', chunk=None):
+def spi(focal_period, reference_period=None, time_dim='year'):
     return compute_si_ppf(
         focal_period, reference_period,
         reference_dist=gamma,
         prob_zero=True,
         fit_kwargs={'floc': 0},
-        time_dim=time_dim,
-        chunk=chunk
+        time_dim=time_dim
     ).transpose(*focal_period.dims)
 
-
-def spei(focal_period, reference_period=None, time_dim='year', chunk=None):
+def spei(focal_period, reference_period=None, time_dim='year'):
     return compute_si_ppf(
         focal_period, reference_period,
         reference_dist=gamma,
         prob_zero=False,
-        time_dim=time_dim,
-        chunk=chunk
+        time_dim=time_dim
     ).transpose(*focal_period.dims)
-
 
 def pr(ds, window, precip='ppt'):
     return ds[precip].rolling(window).sum().assign_attrs(
         {'units': ds[precip].units}
     )
 
-
 def pret(ds, window, precip='ppt', et='pet'):
     wb = ds[precip] - ds[et]
     return wb.rolling(window).sum().assign_attrs(
         {'units': ds[precip].units}
     )
-
 
 def make_indices(ds, span, focal_period, reference_period, indices, time_dim='year'):
     inputs = {}
@@ -104,18 +95,18 @@ def make_indices(ds, span, focal_period, reference_period, indices, time_dim='ye
         window = {time_dim: span}
         match name:
             case "PR":
-                da = pr(ds, window, **params)
+                da = pr(ds, window, **params).load()  # Load data into memory
             case "PRET":
-                da = pret(ds, window, **params)
+                da = pret(ds, window, **params).load()  # Load data into memory
             case "SPI":
                 pr_in = inputs['PR']
-                foc = pr_in.sel({time_dim: slice(*focal_period)})
-                ref = pr_in.sel({time_dim: slice(*reference_period)})
+                foc = pr_in.sel({time_dim: slice(*focal_period)}).load()  # Load data into memory
+                ref = pr_in.sel({time_dim: slice(*reference_period)}).load()  # Load data into memory
                 da = spi(foc, ref, time_dim=time_dim, **params)
             case "SPEI":
                 wb_in = inputs['PRET']
-                foc = wb_in.sel({time_dim: slice(*focal_period)})
-                ref = wb_in.sel({time_dim: slice(*reference_period)})
+                foc = wb_in.sel({time_dim: slice(*focal_period)}).load()  # Load data into memory
+                ref = wb_in.sel({time_dim: slice(*reference_period)}).load()  # Load data into memory
                 da = spei(foc, ref, time_dim=time_dim, **params)
             case _:
                 raise ValueError(f'Unknown index "{name}"')
@@ -129,7 +120,6 @@ def make_indices(ds, span, focal_period, reference_period, indices, time_dim='ye
         ret_indices.append(sub)
 
     return ret_indices
-
 
 @click.command()
 @click.argument('inputfile', type=click.Path(
@@ -173,7 +163,7 @@ def main(inputfile, configfile, outputfile, reference):
         )
         ds.rio.write_crs(dsref.rio.crs, inplace=True)
 
-    orig = ds.sel({time_dim: slice(*focal_period)})
+    orig = ds.sel({time_dim: slice(*focal_period)}).load()  # Load data into memory
 
     all_indices = [orig]
     with ProcessPoolExecutor() as executor:
@@ -189,7 +179,6 @@ def main(inputfile, configfile, outputfile, reference):
 
     indices_ds.to_zarr(outputfile, mode='w', consolidated=True)
     print('Done')
-
 
 if __name__ == '__main__':
     main()
