@@ -1,37 +1,7 @@
 #!/bin/bash
 
-# Configuration
-configfile="config/snakemake.yml"
+source common.sh
 
-# Function to parse YAML (simplified)
-parse_yaml() {
-    local prefix=$2
-    local s='[[:space:]]*'
-    local w='[a-zA-Z0-9_]*'
-    local fs=$(echo @|tr @ '\034')
-    sed -ne "s|^\($s\):|\1|" \
-         -e "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|$prefix\2=\3|p" \
-         -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|$prefix\2=\3|p" $1
-}
-
-# Load configurations from YAML
-eval $(parse_yaml $configfile "config_")
-
-# Print loaded configuration
-echo "Loaded configuration from $configfile:"
-echo "root_dir: $config_root_dir"
-echo "mortality_subdir: $config_mortality_subdir"
-echo "mort_config: $config_mort_config"
-echo "mort_fold_config: $config_mort_fold_config"
-echo "mort_trainset_config: $config_mort_trainset_config"
-echo "bcm_subdir: $config_bcm_subdir"
-echo "topo_subdir: $config_topo_subdir"
-
-# Directories
-mortdir="${config_root_dir}/${config_mortality_subdir}"
-mort_generated_dir="${mortdir}/generated"
-bcmdir="${config_root_dir}/${config_bcm_subdir}"
-topodir="${config_root_dir}/${config_topo_subdir}"
 echo "Mortality directory: $mortdir"
 echo "BCM directory: $bcmdir"
 echo "Topo directory: $topodir"
@@ -57,6 +27,8 @@ mortality_random_folds() {
     echo "Output directory: $output_directory"
     echo "Using config file: $config"
 
+    delete_directory "${output_directory}"
+
     # Execute the append_folds.py script
     echo "Executing python script to append random folds..."
     python src/append_folds.py "$input_file" "$config" "$output_directory" || handle_error "Appending random folds failed."
@@ -81,6 +53,8 @@ mortality_random_training() {
     echo "Output directory: $output_directory"
     echo "Using config file: $config"
 
+    delete_directory "${output_directory}"
+
     # Execute the construct_training_dataset.py script
     echo "Executing python script to construct random training dataset..."
     python src/construct_training_dataset.py "${input_files[@]}" "$config" "$output_directory" || handle_error "Random training dataset construction failed."
@@ -102,6 +76,8 @@ nonzero_random_mortality() {
 
     echo "Output directory: $output_directory"
     echo "Using config file: $config"
+
+    delete_directory "${output_directory}"
 
     # Execute the filter_zero_values.py script
     echo "Executing python script to filter zero values from random training dataset..."

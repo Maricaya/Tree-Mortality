@@ -26,11 +26,11 @@ delete_directory() {
 
     if [ -d "${target_directory}" ]; then
         /usr/bin/find "${target_directory}" -mindepth 1 -exec /bin/rm -rf {} +
-        printf "Deleted contents of directory: %s\n" "${target_directory}"
+#        printf "Deleted contents of directory: %s\n" "${target_directory}"
         /bin/rm -rf "${target_directory}"
-        printf "Deleted directory: %s\n" "${target_directory}"
-    else
-        printf "Directory does not exist: %s\n" "${target_directory}" >&2
+#        printf "Deleted directory: %s\n" "${target_directory}"
+#    else
+#        printf "Directory does not exist: %s\n" "${target_directory}" >&2
     fi
 }
 

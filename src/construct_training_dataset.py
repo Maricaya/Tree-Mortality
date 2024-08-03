@@ -28,11 +28,13 @@ def get_climate_features(clim, year, feature_info):
 
 
 def get_topography_features(topo, feature_info):
-    return [topo[fname] for fname in feature_info]
+    missing_features = [fname for fname in feature_info if fname not in topo]
+    if missing_features:
+        print(f"Warning: Missing topography features: {missing_features}")
+    return [topo[fname] for fname in feature_info if fname in topo]
 
 
 def to_samples(mort, clim, topo, year, feature_info, target):
-
     # Make a new variable to hold copy of the year for each cell
     year_var = mort['id'].copy().rename('year_copy')
     year_var[:] = year
@@ -52,29 +54,18 @@ def to_samples(mort, clim, topo, year, feature_info, target):
     feat_ds = feat_ds.drop_vars(('year', 'spatial_ref',))
     feat_ds = feat_ds.stack(sample=('easting', 'northing'), create_index=False)
     feat_ds = feat_ds.reset_coords(('northing', 'easting'))
-    feat_ds = feat_ds.rename({ 'year_copy': 'year' })
+    feat_ds = feat_ds.rename({'year_copy': 'year'})
 
     return feat_ds
 
 
 @click.command()
-@click.argument('mortalityfile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('climatefile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('topofile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('configfile', type=click.Path(
-    path_type=Path, exists=True
-))
-@click.argument('outputfile', type=click.Path(
-    path_type=Path, exists=False
-))
+@click.argument('mortalityfile', type=click.Path(path_type=Path, exists=True))
+@click.argument('climatefile', type=click.Path(path_type=Path, exists=True))
+@click.argument('topofile', type=click.Path(path_type=Path, exists=True))
+@click.argument('configfile', type=click.Path(path_type=Path, exists=True))
+@click.argument('outputfile', type=click.Path(path_type=Path, exists=False))
 def main(mortalityfile, climatefile, topofile, configfile, outputfile):
-
     config = load_config(configfile)
 
     years = config['years']
