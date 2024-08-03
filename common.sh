@@ -45,6 +45,8 @@ print_config() {
     printf "bcm_subdir: %s\n" "$config_bcm_subdir"
     printf "bcm_ind_config: %s\n" "$config_bcm_ind_config"
     printf "topo_subdir: %s\n" "$config_topo_subdir"
+    echo "topobase: $config_topobase"
+    echo "topo_config: $config_topo_config"
 }
 
 # Directories
