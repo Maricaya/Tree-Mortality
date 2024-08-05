@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# 06_train
 source common.sh
 
 # Directories

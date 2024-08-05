@@ -1,0 +1,29 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "all_training", color = "0.12 0.6 0.85", style="rounded,dashed"];
+	1[label = "train_model\nbase: tree_mortality", color = "0.64 0.6 0.85", style="rounded,dashed"];
+	2[label = "mortality_training", color = "0.58 0.6 0.85", style="rounded,dashed"];
+	3[label = "mortality_folds", color = "0.49 0.6 0.85", style="rounded,dashed"];
+	4[label = "mortality", color = "0.55 0.6 0.85", style="rounded,dashed"];
+	5[label = "bcm_indexes", color = "0.23 0.6 0.85", style="rounded,dashed"];
+	6[label = "aggregate_bcm", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	7[label = "merge_bcm", color = "0.26 0.6 0.85", style="rounded,dashed"];
+	8[label = "convert_bcm\nvar: aet", color = "0.14 0.6 0.85", style="rounded,dashed"];
+	9[label = "convert_bcm\nvar: pet", color = "0.14 0.6 0.85", style="rounded,dashed"];
+	10[label = "convert_bcm\nvar: ppt", color = "0.14 0.6 0.85", style="rounded,dashed"];
+	11[label = "topo", color = "0.38 0.6 0.85", style="rounded,dashed"];
+	1 -> 0
+	2 -> 1
+	3 -> 2
+	5 -> 2
+	11 -> 2
+	4 -> 3
+	6 -> 5
+	7 -> 6
+	8 -> 7
+	9 -> 7
+	10 -> 7
+	6 -> 11
+}            

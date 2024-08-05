@@ -127,3 +127,4 @@ for var in "${bcm_variables[@]}"; do
 done
 merge_projection "$model" "$scenario"
 aggregate_projection "$model" "$scenario"
+projection_indexes "$model" "$scenario"
