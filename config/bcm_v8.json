@@ -5,6 +5,14 @@
       "long_name": "Actual Evapotranspiration",
       "units": "mm"
     },
+    "cwd": {
+      "long_name": "Climatic Water Deficit",
+      "units": "mm"
+    },
+    "pck": {
+      "long_name": "Snow Pack",
+      "units": "mm"
+    },
     "pet": {
       "long_name": "Potential Evapotranspiration",
       "units": "mm"

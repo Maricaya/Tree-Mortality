@@ -27,7 +27,7 @@ train_model() {
     echo "Input file: $input_file"
     echo "Output file: $output_file"
 
-#    delete_directory "${output_directory}"
+    delete_directory "${output_directory}"
 
     # Execute the train_rf_model_ray.py script
     echo "Executing python script to train model..."

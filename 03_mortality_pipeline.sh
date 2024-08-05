@@ -16,8 +16,8 @@ mortality() {
 
     delete_directory "${output_directory}"
 
-#    printf "Output directory: %s\n" "$output_directory"
-#    printf "Using config file: %s\n" "$config"
+    printf "Output directory: %s\n" "$output_directory"
+    printf "Using config file: %s\n" "$config"
 
     # Execute the convert_tree_mortality.py script
     printf "Executing python script to convert tree mortality data...\n"
@@ -46,8 +46,8 @@ mortality_folds() {
         return 1
     fi
 
-#    printf "Output directory: %s\n" "$output_directory"
-#    printf "Using config file: %s\n" "$config"
+    printf "Output directory: %s\n" "$output_directory"
+    printf "Using config file: %s\n" "$config"
 
     # Execute the append_folds.py script
     printf "Executing python script to append folds...\n"
@@ -78,8 +78,8 @@ mortality_training() {
         fi
     done
 
-#    printf "Output directory: %s\n" "$output_directory"
-#    printf "Using config file: %s\n" "$config"
+    printf "Output directory: %s\n" "$output_directory"
+    printf "Using config file: %s\n" "$config"
 
     # Execute the construct_training_dataset.py script
     printf "Executing python script to construct training dataset...\n"
@@ -108,8 +108,8 @@ nonzero_mortality() {
         return 1
     fi
 
-#    printf "Output directory: %s\n" "$output_directory"
-#    printf "Using config file: %s\n" "$config"
+    printf "Output directory: %s\n" "$output_directory"
+    printf "Using config file: %s\n" "$config"
 
     # Execute the filter_zero_values.py script
     printf "Executing python script to filter zero values...\n"

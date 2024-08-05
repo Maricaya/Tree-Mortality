@@ -120,10 +120,10 @@ projection_indexes() {
 # Models and scenarios
 model="GFDL-CM3"  # Add your models here
 scenario="RCP45"  # Add your scenarios here
+
 # Execute steps for each combination of model, scenario, and variable
 for var in "${bcm_variables[@]}"; do
     convert_projection "$model" "$scenario" "$var"
 done
 merge_projection "$model" "$scenario"
 aggregate_projection "$model" "$scenario"
-

@@ -8,7 +8,6 @@ from tqdm import tqdm
 from scipy.stats import norm, gamma
 from concurrent.futures import ProcessPoolExecutor
 
-
 def _compute_si(focus, ref, dist=gamma, prob_zero=False, fit_kwargs=None):
     nan_values = np.isnan(ref)
     if np.all(nan_values):
