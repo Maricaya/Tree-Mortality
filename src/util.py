@@ -3,7 +3,7 @@ EcoPro Tree Mortality
 Utility Functions
 """
 import yaml
-
+import os
 
 def load_config(configfile):
     with open(configfile, 'r') as f:

@@ -37,7 +37,7 @@ train_model() {
 }
 
 # Bases for training
-bases=("tree_mortality" "tree_mortality_random")  # Add your bases here
+bases=("tree_mortality")  # Add your bases here
 
 # Execute train_model for each base
 for base in "${bases[@]}"; do

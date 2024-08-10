@@ -1,0 +1,16 @@
+./convert_bcm.sh, Execution time: 57 seconds
+sciunit exec ./convert_bcm.sh, Execution time: 134 seconds
+./mortality_folds.sh, Execution time: 9 seconds
+sciunit exec ./mortality_folds.sh, Execution time: 24 seconds
+./merge_bcm.sh, Execution time: 36 seconds
+sciunit exec ./merge_bcm.sh, Execution time: 86 seconds
+./aggregate_bcm.sh, Execution time: 11 seconds
+sciunit exec ./aggregate_bcm.sh, Execution time: 59 seconds
+./bcm_indexes.sh, Execution time: 146 seconds
+sciunit exec ./bcm_indexes.sh, Execution time: 199 seconds
+./topo.sh, Execution time: 63 seconds
+sciunit exec ./topo.sh, Execution time: 280 seconds
+./mortality_training.sh, Execution time: 15 seconds
+sciunit exec ./mortality_training.sh, Execution time: 21 seconds
+./train_model.sh, Execution time: 67 seconds
+sciunit exec ./train_model.sh, Execution time: 3 seconds

@@ -1,7 +1,7 @@
 
 # Directory Structure
 
-root_dir: '/Tree-Mortality/data'
+root_dir: '/shared/data'
 projections_subdir: 'projections/BCM'
 mortality_subdir: 'tree_mortality'
 bcm_subdir: 'bcm'

@@ -126,6 +126,8 @@ def main(datadir, configfile, outputfile):
 
     dataset = dataset.chunk(chunks)
 
+
+
     write_job = dataset.to_zarr(
         outputfile, mode='w', compute=False, consolidated=True
     )

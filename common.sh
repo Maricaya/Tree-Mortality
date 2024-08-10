@@ -19,18 +19,65 @@ parse_yaml() {
 # Load configurations from YAML
 eval $(parse_yaml $CONFIGFILE "config_")
 
-# Function to delete a directory if it exists
+delete_files_and_directories() {
+    local dir="$1"
+ #   echo "Processing directory: $dir"
+    
+    # Iterate over all files and directories in the current directory, including hidden ones
+    for item in "$dir"/* "$dir"/.[!.]* "$dir"/..?*; do
+        # Skip if no such file or directory
+        [ -e "$item" ] || continue
+        
+        if [ -d "$item" ]; then
+            # If the item is a directory, call the function recursively
+            delete_files_and_directories "$item"
+        else
+            # If the item is a file, delete it
+#            echo "Deleting file: $item"
+            rm -f "$item"
+        fi
+    done
+
+    # Attempt to delete the current directory
+  #  echo "Deleting directory: $dir"
+    rmdir "$dir"
+}
+
 delete_directory() {
-    local target_directory="~/sciunit/${SCIUNIT_PROJECT_NAME}/cde-package/cde-root${1}"
+    local sub_path="${1}"
+    local base_directory="$HOME/sciunit/${SCIUNIT_PROJECT_NAME}/cde-package/cde-root"
+  #  echo "---= Base directory: ${base_directory}"
+  #  echo "---= Sub path: ${sub_path}"
+
+    local target_directory="${base_directory}${sub_path}"
+  #  echo "---= Target directory before evaluation: ${target_directory}"
     target_directory=$(eval echo ${target_directory})
+  #  echo "==== Target directory after evaluation: ${target_directory}"
+
+    if [ -d "${sub_path}" ]; then 
+ 	delete_files_and_directories "${sub_path}"
+ #       if [ $? -eq 0 ]; then
+#            printf "==== sub_path  Deleted directory: %s\n" "${sub_path}"
+#        else
+#            printf "==== sub_path  Failed to delete directory: %s\n" "${sub_path}"
+#        fi
+#    else
+#        printf "==== sub_path  Directory does not exist: %s\n" "${target_directory}" >&2
+    fi
 
     if [ -d "${target_directory}" ]; then
-        /usr/bin/find "${target_directory}" -mindepth 1 -exec /bin/rm -rf {} +
-#        printf "Deleted contents of directory: %s\n" "${target_directory}"
-        /bin/rm -rf "${target_directory}"
-#        printf "Deleted directory: %s\n" "${target_directory}"
+  #      echo "===== Directory exists: ${target_directory}"
+  #      echo "==== Running: /bin/rm -rf ${target_directory}"
+   
+	delete_files_and_directories "${target_directory}"
+
+#	if [ $? -eq 0 ]; then
+#            printf "==== Deleted directory: %s\n" "${target_directory}"
+#        else
+#            printf "==== Failed to delete directory: %s\n" "${target_directory}"
+#        fi
 #    else
-#        printf "Directory does not exist: %s\n" "${target_directory}" >&2
+#        printf "==== Directory does not exist: %s\n" "${target_directory}" >&2
     fi
 }
 
