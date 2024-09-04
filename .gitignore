@@ -11,3 +11,6 @@
 *.zarr
 figs
 .snakemake
+*.out
+.commitgpt-template
+.commitgpt.json

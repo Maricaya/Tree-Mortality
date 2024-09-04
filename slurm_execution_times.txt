@@ -1,6 +1,0 @@
-sbatch audit.slurm, Execution time: 1573 seconds
-audit.slurm, Execution time: 2 seconds
-test_time.slurm, Execution time: 0 seconds (Job finished without running)
-test_time.slurm, Execution time: 0 seconds (Job finished without running)
-test_time.slurm, Execution time: 0 seconds (Job finished without running)
-test_time.slurm, Execution time: 1 seconds

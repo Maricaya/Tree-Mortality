@@ -1,29 +1,76 @@
 digraph snakemake_dag {
-    graph[bgcolor=white, margin=0];
-    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
-    edge[penwidth=2, color=grey];
-	0[label = "all_training", color = "0.12 0.6 0.85", style="rounded,dashed"];
-	1[label = "train_model\nbase: tree_mortality", color = "0.64 0.6 0.85", style="rounded,dashed"];
-	2[label = "mortality_training", color = "0.58 0.6 0.85", style="rounded,dashed"];
-	3[label = "mortality_folds", color = "0.49 0.6 0.85", style="rounded,dashed"];
-	4[label = "mortality", color = "0.55 0.6 0.85", style="rounded,dashed"];
-	5[label = "bcm_indexes", color = "0.23 0.6 0.85", style="rounded,dashed"];
-	6[label = "aggregate_bcm", color = "0.06 0.6 0.85", style="rounded,dashed"];
-	7[label = "merge_bcm", color = "0.26 0.6 0.85", style="rounded,dashed"];
-	8[label = "convert_bcm\nvar: aet", color = "0.14 0.6 0.85", style="rounded,dashed"];
-	9[label = "convert_bcm\nvar: pet", color = "0.14 0.6 0.85", style="rounded,dashed"];
-	10[label = "convert_bcm\nvar: ppt", color = "0.14 0.6 0.85", style="rounded,dashed"];
-	11[label = "topo", color = "0.38 0.6 0.85", style="rounded,dashed"];
-	1 -> 0
-	2 -> 1
-	3 -> 2
-	5 -> 2
-	11 -> 2
-	4 -> 3
-	6 -> 5
-	7 -> 6
-	8 -> 7
-	9 -> 7
-	10 -> 7
-	6 -> 11
-}            
+	graph [bb="0,0,261.5,468",
+		bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		label="\N",
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	0	[color="0.49 0.6 0.85",
+		height=0.5,
+		label=all_training,
+		pos="149.5,18",
+		width=0.98611];
+	1	[color="0.52 0.6 0.85",
+		height=0.5,
+		label=train_model,
+		pos="149.5,90",
+		width=1.0417];
+	1 -> 0	[pos="e,149.5,36.104 149.5,71.697 149.5,63.983 149.5,54.712 149.5,46.112"];
+	2	[color="0.12 0.6 0.85",
+		height=0.5,
+		label=mortality_training,
+		pos="149.5,162",
+		width=1.4444];
+	2 -> 1	[pos="e,149.5,108.1 149.5,143.7 149.5,135.98 149.5,126.71 149.5,118.11"];
+	3	[color="0.38 0.6 0.85",
+		height=0.5,
+		label=mortality_folds,
+		pos="45.5,234",
+		width=1.2639];
+	3 -> 2	[pos="e,123.96,180.19 70.941,215.88 84.287,206.89 100.82,195.76 115.28,186.03"];
+	4	[color="0.09 0.6 0.85",
+		height=0.5,
+		label=mortality,
+		pos="45.5,306",
+		width=0.86111];
+	4 -> 3	[pos="e,45.5,252.1 45.5,287.7 45.5,279.98 45.5,270.71 45.5,262.11"];
+	5	[color="0.29 0.6 0.85",
+		height=0.5,
+		label=bcm_indexes,
+		pos="149.5,234",
+		width=1.1111];
+	5 -> 2	[pos="e,149.5,180.1 149.5,215.7 149.5,207.98 149.5,198.71 149.5,190.11"];
+	6	[color="0.46 0.6 0.85",
+		height=0.5,
+		label=aggregate_bcm,
+		pos="191.5,306",
+		width=1.2778];
+	6 -> 5	[pos="e,159.76,252.1 181.12,287.7 176.24,279.56 170.31,269.69 164.92,260.7"];
+	9	[color="0.23 0.6 0.85",
+		height=0.5,
+		label=topo,
+		pos="234.5,234",
+		width=0.75];
+	6 -> 9	[pos="e,223.99,252.1 202.13,287.7 207.13,279.56 213.19,269.69 218.71,260.7"];
+	7	[color="0.35 0.6 0.85",
+		height=0.5,
+		label=merge_bcm,
+		pos="191.5,378",
+		width=1.0278];
+	7 -> 6	[pos="e,191.5,324.1 191.5,359.7 191.5,351.98 191.5,342.71 191.5,334.11"];
+	8	[color="0.43 0.6 0.85",
+		height=0.5,
+		label=convert_bcm,
+		pos="191.5,450",
+		width=1.1111];
+	8 -> 7	[pos="e,191.5,396.1 191.5,431.7 191.5,423.98 191.5,414.71 191.5,406.11"];
+	9 -> 2	[pos="e,170.27,180.1 213.49,215.7 202.78,206.88 189.61,196.03 178,186.47"];
+}

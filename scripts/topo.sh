@@ -14,7 +14,7 @@ handle_error() {
 }
 
 # Step 8: Generate Topographic Features
-# todo 先不做，因为有 R
+# todo Don't do it yet, because of R
 #topo_features() {
 #    echo "Starting topo_features function..."
 #

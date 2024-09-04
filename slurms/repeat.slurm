@@ -6,12 +6,6 @@
 #SBATCH --time=01:00:00
 #SBATCH --ntasks-per-node=1
 
-#parallel sciunit repeat ::: e8 e9
-#parallel sciunit repeat ::: e10 e11
-#parallel sciunit repeat ::: e12
-#parallel sciunit repeat ::: e13 e14
-#parallel sciunit repeat ::: e15
-
 # Log the start time of the entire job
 echo "repeat Job started at: $(date)" >> timing.log
 

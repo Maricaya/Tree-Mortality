@@ -2,13 +2,14 @@
 
 # Define the list of scripts to be executed
 scripts=(
-  "./convert_bcm.sh"
-  "./mortality_folds.sh"
-  "./merge_bcm.sh"
-  "./aggregate_bcm.sh"
-  "./bcm_indexes.sh"
-  "./topo.sh"
-  "./mortality_training.sh"
+  "./scripts/convert_bcm.sh"
+  "./scripts/mortality.sh"
+  "./scripts/mortality_folds.sh"
+  "./scripts/merge_bcm.sh"
+  "./scripts/aggregate_bcm.sh"
+  "./scripts/bcm_indexes.sh"
+  "./scripts/topo.sh"
+  "./scripts/mortality_training.sh"
 )
 
 # Output file to store execution times

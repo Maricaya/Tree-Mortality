@@ -1,6 +1,0 @@
-  sciunit parallel_exec ::: command_1 command_2 ... command_n
-                              Repeat the execution of <execution id1> to
-                              <execution idn>. Use parallel before sciunit exec
-  sciunit parallel_exec ::: command_1 command_2 ... command_n
-                              Repeat the execution of <execution id1> to
-                              <execution idn>. Use parallel before sciunit exec
