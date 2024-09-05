@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source ./scripts/common.sh
 
 # Directories
 echo "Projections directory: $projdir"

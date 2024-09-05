@@ -1,5 +1,22 @@
-EcoPro Tree Mortality
+Containerize Tree Mortality with Sciunit
 =====================
+
+explain in detail: [https://yuszqybkpdvc.larksuite.com/wiki/ONx8wQEnTikEJVkEWGFuVrPosSf?from=from_copylink](Containerize Tree Mortality with Sciunit)
+
+
+I created a Dockerfile to simplify the use of the workflow. You can find it here: [Dockerfile for Tree-Mortality](./docker/dockerfile).
+Here’s a quick demonstration of how to use it:
+1. Download the required data.
+```
+wget https://depauledu-my.sharepoint.com/:u:/g/personal/xchu3_depaul_edu/EVkiqIrakgxBi1xsf4VU2EAB-3Ibpt0f8Jenqltd3KwEjA?download=1 -O data.zip
+unzip data.zip
+```
+2. Build and run the Docker container to execute the workflow.
+```
+docker build -t tree-mortality .
+docker run -v ./:/shared -it tree-mortality
+```
+
 
 ## Contributors
  - Gary Doran

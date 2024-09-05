@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source ./scripts/common.sh
 
 echo "Mortality directory: $mortdir"
 echo "BCM directory: $bcmdir"

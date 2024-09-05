@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source ./scripts/common.sh
 
 # Step : Append Folds to Mortality Data
 mortality_folds() {

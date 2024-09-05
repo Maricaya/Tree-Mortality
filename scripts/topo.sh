@@ -1,6 +1,6 @@
 #!/bin/bash
 # 02_topo
-source common.sh
+source ./scripts/common.sh
 
 # Directories
 echo "Mortality directory: $mortdir"

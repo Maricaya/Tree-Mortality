@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source ./scripts/common.sh
 
 # Step 4: Filter Non-Zero Mortality Data
 nonzero_mortality() {

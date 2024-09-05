@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source ./scripts/common.sh
 
 # Step 1: Convert Mortality Data
 mortality() {

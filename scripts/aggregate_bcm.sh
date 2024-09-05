@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source ./scripts/common.sh
 
 # Function to aggregate BCM
 aggregate_bcm() {

@@ -1,6 +1,6 @@
 #!/bin/bash
 # 06_train
-source common.sh
+source ./scripts/common.sh
 
 # Directories
 echo "Mortality directory: $mortdir"
