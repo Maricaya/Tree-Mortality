@@ -16,7 +16,14 @@ unzip data.zip
 docker build -t tree-mortality .
 docker run -v ./:/shared -it tree-mortality
 ```
-
+3. sequential execution
+```
+sciunit create tree-mortality  && export TZ='America/Chicago'
+chmod +x *.sh
+sciunit exec ./time.sh
+```
+4. parallel computing
+Thank you for your patience. The code for parallel computing is still being refined and has not been released yet. We will send you an email as soon as it becomes available.
 
 ## Contributors
  - Gary Doran
