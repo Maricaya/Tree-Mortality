@@ -8,9 +8,9 @@
 
 set -x
 python --version
-export PATH=$HOME/parallel-install/bin:$PATH
+#export PATH=$HOME/parallel-install/bin:$PATH
 which parallel
- parallel --version
+parallel --version
 # Log the start time of the job
 echo "Job started at: $(date)" >> timing.log
 
@@ -19,7 +19,7 @@ for step in 1 2 3 4 5
 do
     cat ./steps/step${step}.sh
     start_time=$(date +%s.%N)
-    tail ./steps/step${step}.sh | /home/ubuntu/parallel-20240722/src/parallel   -j2
+    tail ./steps/step${step}.sh | parallel   -j2
     end_time=$(date +%s.%N)
     elapsed_time=$(echo "$end_time - $start_time" | bc)
     elapsed_time=$(printf "%.3f" "$elapsed_time")

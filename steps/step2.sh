@@ -1,5 +1,5 @@
 #!/bin/bash
 
-python -m sciunit2 parallel_exec ./scripts/mortality_folds.sh
-python -m sciunit2 parallel_exec ./scripts/merge_bcm.sh
+sciunit parallel_exec ./scripts/mortality_folds.sh
+sciunit parallel_exec ./scripts/merge_bcm.sh
 

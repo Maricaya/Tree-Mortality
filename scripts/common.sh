@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-CONFIGFILE="config/snakemake.yml"
+CONFIGFILE="./config/snakemake.yml"
 # todo auto
 SCIUNIT_PROJECT_NAME="tree-mortality"
 
@@ -22,12 +22,12 @@ eval $(parse_yaml $CONFIGFILE "config_")
 delete_files_and_directories() {
     local dir="$1"
  #   echo "Processing directory: $dir"
-    
+
     # Iterate over all files and directories in the current directory, including hidden ones
     for item in "$dir"/* "$dir"/.[!.]* "$dir"/..?*; do
         # Skip if no such file or directory
         [ -e "$item" ] || continue
-        
+
         if [ -d "$item" ]; then
             # If the item is a directory, call the function recursively
             delete_files_and_directories "$item"
@@ -54,7 +54,7 @@ delete_directory() {
     target_directory=$(eval echo ${target_directory})
   #  echo "==== Target directory after evaluation: ${target_directory}"
 
-    if [ -d "${sub_path}" ]; then 
+    if [ -d "${sub_path}" ]; then
  	delete_files_and_directories "${sub_path}"
  #       if [ $? -eq 0 ]; then
 #            printf "==== sub_path  Deleted directory: %s\n" "${sub_path}"
@@ -68,7 +68,7 @@ delete_directory() {
     if [ -d "${target_directory}" ]; then
   #      echo "===== Directory exists: ${target_directory}"
   #      echo "==== Running: /bin/rm -rf ${target_directory}"
-   
+
 	delete_files_and_directories "${target_directory}"
 
 #	if [ $? -eq 0 ]; then
